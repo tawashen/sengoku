@@ -105,7 +105,11 @@ func (m model) View() string {
 
 		neighborNames := []string{}
 		for _, nid := range p.Neighbors {
-			neighborNames = append(neighborNames, m.gameState.Provinces[nid].Name)
+			if neighbor, ok := m.gameState.Provinces[nid]; ok {
+				neighborNames = append(neighborNames, neighbor.Name)
+			} else {
+				neighborNames = append(neighborNames, fmt.Sprintf("%s(未登録)", nid))
+			}
 		}
 
 		line := fmt.Sprintf("%s%s (隣接: %s)", cursor, p.Name, strings.Join(neighborNames, ", "))
@@ -123,8 +127,10 @@ func (m model) View() string {
 }
 
 func main() {
+
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Error running program: %v", err)
 	}
+
 }

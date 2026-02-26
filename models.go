@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 // GamePhase represents the current stage of the turn
 type GamePhase int
 
@@ -73,30 +71,4 @@ func (gs *GameState) AreNeighbors(id1, id2 string) bool {
 		}
 	}
 	return false
-}
-
-func main() {
-	// Sample initialization to demonstrate the structure
-	gs := &GameState{
-		Year:      1560,
-		Phase:     TaxPhase,
-		Provinces: make(map[string]*Province),
-	}
-
-	// Example: Owari and Mikawa
-	gs.Provinces["owari"] = &Province{
-		ID:        "owari",
-		Name:      "尾張",
-		Kokudaka:  10,
-		Neighbors: []string{"mikawa", "mino", "ise"},
-	}
-	gs.Provinces["mikawa"] = &Province{
-		ID:        "mikawa",
-		Name:      "三河",
-		Kokudaka:  5,
-		Neighbors: []string{"owari", "totomi", "shinano"},
-	}
-
-	fmt.Printf("%d年 %sフェイズ\n", gs.Year, gs.Phase)
-	fmt.Printf("尾張と三河は隣接しているか: %v\n", gs.AreNeighbors("owari", "mikawa"))
 }
