@@ -1,62 +1,80 @@
 package main
 
-// GamePhase represents the current stage of the turn
-type GamePhase int
-
-const (
-	TaxPhase GamePhase = iota
-	ArmyPhase
-	DiplomacyPhase
-	MarchPhase
-	MaintenancePhase
-)
-
-func (p GamePhase) String() string {
-	return []string{"徴税", "軍備", "外交・調略", "行軍・合戦", "俸禄・維持"}[p]
-}
-
 // Province represents a country on the map
 type Province struct {
-	ID          string
-	Name        string
-	Kokudaka    int      // 石高
-	OwnerID     string   // 所属プレイヤーID
-	Castles     int      // 城の数
-	Soldiers    int      // 兵士数
-	IsRestless  bool     // 不穏状態
-	HasUprising bool     // 一揆発生中
-	Neighbors   []string // 隣接する国のID (つながり)
+	ID       string
+	Name     string
+	Kokudaka int    // 石高
+	OwnerID  string // 所属プレイヤーID
+	Complete bool   //完全支配かどうか
+	Castles  []Castle
+	Soldiers int  // 兵士数
+	Restless bool // 不穏状態
+	//HasUprising bool     // 一揆発生
+	Starving  bool //飢饉発生
+	Christian bool //キリシタン発生
+	TradePort bool
+	GoldMine  bool
+	Neighbors []string // 隣接する国のID (つながり)
 }
 
 // General represents a Sengoku Daimyo or vassal
 type General struct {
-	ID         string
+	ID         string //モブ武将もいる
 	Name       string
 	Combat     int    // 戦闘能力
+	PlusCombat int    //軍師としてのパワー
 	Politics   int    // 内政能力
-	Ambition   int    // 野心
+	Prestige   int    //威信
 	Loyalty    int    // 忠誠度
 	Stipend    int    // 俸禄
 	ProvinceID string // 所在国ID
 	OwnerID    string // 所属プレイヤーID
 }
 
+type Castle struct {
+	Ruler            string //Player ID　もしくは中立
+	Power            int    //1につき1000人
+	IkkouUprising    bool   //一揆発生
+	DoUprising       bool   //土一揆
+	ProvinceUprising bool   //国一揆
+	Isolated         bool   //孤立中
+	Surrounded       bool   //包囲中
+}
+
 // Player represents a clan/daimyo controller
 type Player struct {
-	ID   string
-	Name string
-	Gold int
-	Clan string
-	IsAI bool
+	ID        string
+	Name      string //大名の名前
+	Gold      int
+	Clan      string
+	IsAI      bool
+	Generals  []string //大名の下の将校
+	Provinces []string //大名の所持する国
+	Power     int      //国力の合計
+	//Order     int      // 順番
+}
+
+type Card struct {
+	Name   string //キーはこれを使う
+	Secret bool   //秘密
+	Event  bool   //事件
+	Dice   *Dice  //これをキーにして辞書内に入れたメソッドを呼び出す？
+}
+
+type Dice struct {
+	Result [6]any
 }
 
 // GameState holds the entire game world data
 type GameState struct {
 	Year      int
-	Phase     GamePhase
+	Phase     string
 	Provinces map[string]*Province
 	Generals  map[string]*General
-	Players   map[string]*Player
+	Players   []*Player
+	Order     []int //PlayerのIndex用
+	Cards     []Card
 }
 
 // Helper: Check if two provinces are neighbors
