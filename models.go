@@ -56,10 +56,11 @@ type Player struct {
 }
 
 type Card struct {
-	Name   string //キーはこれを使う
-	Secret bool   //秘密
-	Event  bool   //事件
-	Dice   *Dice  //これをキーにして辞書内に入れたメソッドを呼び出す？
+	Name        string //キーはこれを使う
+	Description string //説明内容
+	Secret      bool   //秘密
+	Event       bool   //事件
+	Dice        *Dice  //これをキーにして辞書内に入れたメソッドを呼び出す？
 }
 
 type Dice struct {
@@ -89,4 +90,10 @@ func (gs *GameState) AreNeighbors(id1, id2 string) bool {
 		}
 	}
 	return false
+}
+
+func (m *model) ExecuteCard(c Card) {
+	if effect, ok := EffectMap[c.Name]; ok {
+		effect(m, c)
+	}
 }
