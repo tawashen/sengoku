@@ -20,16 +20,18 @@ type Province struct {
 
 // General represents a Sengoku Daimyo or vassal
 type General struct {
-	ID         string //モブ武将もいる
-	Name       string
-	Combat     int    // 戦闘能力
-	PlusCombat int    //軍師としてのパワー
-	Politics   int    // 内政能力
-	Prestige   int    //威信
-	Loyalty    int    // 忠誠度
-	Stipend    int    // 俸禄
-	ProvinceID string // 所在国ID
-	OwnerID    string // 所属プレイヤーID
+	ID           string //モブ武将もいる
+	Name         string
+	Combat       int    // 戦闘能力
+	PlusCombat   int    //戦闘能力補正値
+	Politics     int    // 内政能力
+	Prestige     int    //威信
+	PlusPrestige int    //威信補正
+	Loyalty      int    // 忠誠度
+	PlusLoyalty  int    //忠誠度補正
+	Stipend      int    // 俸禄
+	ProvinceID   string // 所在国ID
+	OwnerID      string // 所属プレイヤーID
 }
 
 type Castle struct {
@@ -90,10 +92,4 @@ func (gs *GameState) AreNeighbors(id1, id2 string) bool {
 		}
 	}
 	return false
-}
-
-func (m *model) ExecuteCard(c Card) {
-	if effect, ok := EffectMap[c.Name]; ok {
-		effect(m, c)
-	}
 }

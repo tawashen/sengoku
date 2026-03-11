@@ -45,8 +45,9 @@ func initialModel() model {
 			{ID: "shingen", Name: "武田信玄", Clan: "武田"},
 			{ID: "kenshin", Name: "上杉謙信", Clan: "上杉"},
 		},
-		Cards: InitializeCards(),
-		Order: []int{0, 1, 2},
+		Cards:    InitializeCards(),
+		Generals: InitializeGenerals(),
+		Order:    []int{0, 1, 2},
 	}
 	return model{
 		gameState: gs,
@@ -196,4 +197,10 @@ func MyShuffleInt(list []int) []int {
 	})
 
 	return list
+}
+
+func (m *model) ExecuteCard(c Card) {
+	if effect, ok := EffectMap[c.Name]; ok {
+		effect(m, c)
+	}
 }
