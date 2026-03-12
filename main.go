@@ -41,13 +41,14 @@ func initialModel() model {
 			},
 		},
 		Players: []*Player{
-			{ID: "nobunaga", Name: "織田信長", Clan: "織田"},
-			{ID: "shingen", Name: "武田信玄", Clan: "武田"},
-			{ID: "kenshin", Name: "上杉謙信", Clan: "上杉"},
+			{ID: "nobunaga", Name: "織田信長", Gold: 100, Clan: "織田", Combat: 3, Politics: 4, Prestige: 5, IsAI: false, Generals: []*General{}, Provinces: []*Province{}, Power: 0, EventC: Card{}, SecretC: []Card{}},
+			{ID: "shingen", Name: "武田信玄", Clan: "武田", Gold: 100, Combat: 4, Politics: 5, Prestige: 5, IsAI: false, Generals: []*General{}, Provinces: []*Province{}, Power: 0, EventC: Card{}, SecretC: []Card{}},
+			{ID: "kenshin", Name: "上杉謙信", Clan: "上杉", Gold: 100, Combat: 5, Politics: 0, Prestige: 5, IsAI: false, Generals: []*General{}, Provinces: []*Province{}, Power: 0, EventC: Card{}, SecretC: []Card{}},
 		},
-		Cards:    InitializeCards(),
-		Generals: InitializeGenerals(),
-		Order:    []int{0, 1, 2},
+		Cards:     InitializeCards(),
+		Generals:  InitializeGenerals(),
+		Order:     []int{0, 1, 2},
+		CardCount: 0,
 	}
 	return model{
 		gameState: gs,
@@ -86,6 +87,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 				m.gameState.Phase = "吉凶札配布フェイズ"
 				m.gameState.Order = MyShuffleInt(m.gameState.Order)
+				m.DistributeCards() //Playerに吉凶カードを配る
 				return m, nil
 			}
 			return m, nil
@@ -137,6 +139,14 @@ func (m model) View() string {
 	case "吉凶札配布フェイズ":
 		s.WriteString("\n\n")
 		s.WriteString("吉凶札配布フェイズ:\n\n")
+		s.WriteString("順番: \n")
+		for i, player := range m.gameState.Order {
+			secretcards := ""
+			for _, card := range m.gameState.Players[player].SecretC {
+				secretcards += card.Name + ", "
+			}
+			s.WriteString(fmt.Sprintf("%d. %s (事件札: %s) (秘密札: %s)\n", i+1, m.gameState.Players[player].Name, m.gameState.Players[player].EventC.Name, secretcards))
+		}
 
 	case "戦闘フェイズ":
 		s.WriteString("\n\n")
@@ -202,5 +212,21 @@ func MyShuffleInt(list []int) []int {
 func (m *model) ExecuteCard(c Card) {
 	if effect, ok := EffectMap[c.Name]; ok {
 		effect(m, c)
+	}
+}
+
+func (m *model) DistributeCards() {
+	for _, player := range m.gameState.Players {
+		index := m.gameState.CardCount
+		if m.gameState.Cards[index].Event == true {
+			player.EventC = m.gameState.Cards[index]
+		} else {
+			player.SecretC = append(player.SecretC, m.gameState.Cards[index])
+		}
+		if m.gameState.CardCount >= len(m.gameState.Cards) {
+			m.gameState.Cards = InitializeCards()
+			m.gameState.CardCount = 0
+		}
+		m.gameState.CardCount++
 	}
 }

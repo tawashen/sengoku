@@ -51,10 +51,14 @@ type Player struct {
 	Gold      int
 	Clan      string
 	IsAI      bool
-	Generals  []string //大名の下の将校
-	Provinces []string //大名の所持する国
-	Power     int      //国力の合計
-	//Order     int      // 順番
+	Combat    int
+	Politics  int
+	Prestige  int
+	Generals  []*General  //大名の下の将校
+	Provinces []*Province //大名の所持する国
+	Power     int         //国力の合計
+	EventC    Card        //イベント用カード置き場
+	SecretC   []Card      //3枚までもてる秘密カード
 }
 
 type Card struct {
@@ -62,7 +66,7 @@ type Card struct {
 	Description string //説明内容
 	Secret      bool   //秘密
 	Event       bool   //事件
-	Dice        *Dice  //これをキーにして辞書内に入れたメソッドを呼び出す？
+	Dice        *Dice
 }
 
 type Dice struct {
@@ -78,6 +82,7 @@ type GameState struct {
 	Players   []*Player
 	Order     []int //PlayerのIndex用
 	Cards     []Card
+	CardCount int //Card選択用カウンター
 }
 
 // Helper: Check if two provinces are neighbors
