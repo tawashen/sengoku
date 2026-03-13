@@ -20,45 +20,38 @@ type Province struct {
 
 // General represents a Sengoku Daimyo or vassal
 type General struct {
-	ID           string //モブ武将もいる
+	ID           string
 	Name         string
 	Combat       int    // 戦闘能力
-	PlusCombat   int    //戦闘能力補正値
+	PlusCombat   int    // 戦闘能力補正値
 	Politics     int    // 内政能力
-	Prestige     int    //威信
-	PlusPrestige int    //威信補正
+	Prestige     int    // 威信
+	PlusPrestige int    // 威信補正
 	Loyalty      int    // 忠誠度
-	PlusLoyalty  int    //忠誠度補正
+	PlusLoyalty  int    // 忠誠度補正
 	Stipend      int    // 俸禄
 	ProvinceID   string // 所在国ID
 	OwnerID      string // 所属プレイヤーID
+
+	// 大名（プレイヤー）としての拡張フィールド
+	Gold      int
+	Clan      string
+	IsAI      bool
+	Vassals   []*General  // 配下の武将
+	Provinces []*Province // 領地
+	Power     int         // 国力の合計
+	EventC    Card        // 事件札
+	SecretC   []Card      // 秘密札
 }
 
 type Castle struct {
-	Ruler            string //Player ID　もしくは中立
+	Ruler            string //大名のID もしくは中立
 	Power            int    //1につき1000人
 	IkkouUprising    bool   //一揆発生
 	DoUprising       bool   //土一揆
 	ProvinceUprising bool   //国一揆
 	Isolated         bool   //孤立中
 	Surrounded       bool   //包囲中
-}
-
-// Player represents a clan/daimyo controller
-type Player struct {
-	ID        string
-	Name      string //大名の名前
-	Gold      int
-	Clan      string
-	IsAI      bool
-	Combat    int
-	Politics  int
-	Prestige  int
-	Generals  []*General  //大名の下の将校
-	Provinces []*Province //大名の所持する国
-	Power     int         //国力の合計
-	EventC    Card        //イベント用カード置き場
-	SecretC   []Card      //3枚までもてる秘密カード
 }
 
 type Card struct {
@@ -79,8 +72,8 @@ type GameState struct {
 	Phase     string
 	Provinces map[string]*Province
 	Generals  map[string]*General
-	Players   []*Player
-	Order     []int //PlayerのIndex用
+	Players   [][]*General // 各プレイヤーごとの武将リスト（[0]がそのプレイヤーの大名）
+	Order     []int        // 大名のIndex用
 	Cards     []Card
 	CardCount int //Card選択用カウンター
 }

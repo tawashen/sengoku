@@ -16,40 +16,59 @@ type model struct {
 }
 
 func initialModel() model {
-	// Sample data for visualization
+	provinces := map[string]*Province{
+		"owari": {
+			ID:        "owari",
+			Name:      "尾張",
+			Kokudaka:  10,
+			Neighbors: []string{"mikawa", "mino", "ise"},
+		},
+		"mikawa": {
+			ID:        "mikawa",
+			Name:      "三河",
+			Kokudaka:  5,
+			Neighbors: []string{"owari", "totomi", "shinano"},
+		},
+		"mino": {
+			ID:        "mino",
+			Name:      "美濃",
+			Kokudaka:  8,
+			Neighbors: []string{"owari", "omi", "echizen", "shinano"},
+		},
+	}
+
 	gs := &GameState{
-		Year:  1560,
-		Phase: "順番決定フェイズ",
-		Provinces: map[string]*Province{
-			"owari": {
-				ID:        "owari",
-				Name:      "尾張",
-				Kokudaka:  10,
-				Neighbors: []string{"mikawa", "mino", "ise"},
-			},
-			"mikawa": {
-				ID:        "mikawa",
-				Name:      "三河",
-				Kokudaka:  5,
-				Neighbors: []string{"owari", "totomi", "shinano"},
-			},
-			"mino": {
-				ID:        "mino",
-				Name:      "美濃",
-				Kokudaka:  8,
-				Neighbors: []string{"owari", "omi", "echizen", "shinano"},
-			},
-		},
-		Players: []*Player{
-			{ID: "nobunaga", Name: "織田信長", Gold: 100, Clan: "織田", Combat: 3, Politics: 4, Prestige: 5, IsAI: false, Generals: []*General{}, Provinces: []*Province{}, Power: 0, EventC: Card{}, SecretC: []Card{}},
-			{ID: "shingen", Name: "武田信玄", Clan: "武田", Gold: 100, Combat: 4, Politics: 5, Prestige: 5, IsAI: false, Generals: []*General{}, Provinces: []*Province{}, Power: 0, EventC: Card{}, SecretC: []Card{}},
-			{ID: "kenshin", Name: "上杉謙信", Clan: "上杉", Gold: 100, Combat: 5, Politics: 0, Prestige: 5, IsAI: false, Generals: []*General{}, Provinces: []*Province{}, Power: 0, EventC: Card{}, SecretC: []Card{}},
-		},
-		Cards:     InitializeCards(),
+		Year:      1560,
+		Phase:     "順番決定フェイズ",
+		Provinces: provinces,
 		Generals:  InitializeGenerals(),
+		Cards:     InitializeCards(),
 		Order:     []int{0, 1, 2},
 		CardCount: 0,
 	}
+
+	// プレイヤーの初期化 (武将データからの参照)
+	nobunaga := gs.Generals["織田信長"]
+	nobunaga.Gold = 100
+	nobunaga.Clan = "織田"
+	nobunaga.IsAI = false
+
+	shingen := gs.Generals["武田信玄"]
+	shingen.Gold = 100
+	shingen.Clan = "武田"
+	shingen.IsAI = false
+
+	kenshin := gs.Generals["上杉謙信"]
+	kenshin.Gold = 100
+	kenshin.Clan = "上杉"
+	kenshin.IsAI = false
+
+	gs.Players = [][]*General{
+		{nobunaga},
+		{shingen},
+		{kenshin},
+	}
+
 	return model{
 		gameState: gs,
 		cursor:    0,
@@ -87,7 +106,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 				m.gameState.Phase = "吉凶札配布フェイズ"
 				m.gameState.Order = MyShuffleInt(m.gameState.Order)
-				m.DistributeCards() //Playerに吉凶カードを配る
+				m.DistributeCards() //大名に吉凶カードを配る
 				return m, nil
 			}
 			return m, nil
@@ -140,12 +159,13 @@ func (m model) View() string {
 		s.WriteString("\n\n")
 		s.WriteString("吉凶札配布フェイズ:\n\n")
 		s.WriteString("順番: \n")
-		for i, player := range m.gameState.Order {
+		for i, pIdx := range m.gameState.Order {
+			daimyo := m.gameState.Players[pIdx][0]
 			secretcards := ""
-			for _, card := range m.gameState.Players[player].SecretC {
+			for _, card := range daimyo.SecretC {
 				secretcards += card.Name + ", "
 			}
-			s.WriteString(fmt.Sprintf("%d. %s (事件札: %s) (秘密札: %s)\n", i+1, m.gameState.Players[player].Name, m.gameState.Players[player].EventC.Name, secretcards))
+			s.WriteString(fmt.Sprintf("%d. %s (事件札: %s) (秘密札: %s)\n", i+1, daimyo.Name, daimyo.EventC.Name, secretcards))
 		}
 
 	case "戦闘フェイズ":
@@ -216,17 +236,19 @@ func (m *model) ExecuteCard(c Card) {
 }
 
 func (m *model) DistributeCards() {
-	for _, player := range m.gameState.Players {
+	for _, group := range m.gameState.Players {
+		daimyo := group[0] // 大名に配る
 		index := m.gameState.CardCount
-		if m.gameState.Cards[index].Event == true {
-			player.EventC = m.gameState.Cards[index]
+		if m.gameState.Cards[index].Event {
+			daimyo.EventC = m.gameState.Cards[index]
 		} else {
-			player.SecretC = append(player.SecretC, m.gameState.Cards[index])
+			daimyo.SecretC = append(daimyo.SecretC, m.gameState.Cards[index])
 		}
-		if m.gameState.CardCount >= len(m.gameState.Cards) {
+		if m.gameState.CardCount >= len(m.gameState.Cards)-1 {
 			m.gameState.Cards = InitializeCards()
 			m.gameState.CardCount = 0
+		} else {
+			m.gameState.CardCount++
 		}
-		m.gameState.CardCount++
 	}
 }
