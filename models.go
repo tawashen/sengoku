@@ -2,20 +2,23 @@ package main
 
 // Province represents a country on the map
 type Province struct {
-	ID       string
-	Name     string
-	Kokudaka int    // 石高
-	OwnerID  string // 所属プレイヤーID
-	Complete bool   //完全支配かどうか
-	Castles  []Castle
-	Soldiers int  // 兵士数
-	Restless bool // 不穏状態
-	//HasUprising bool     // 一揆発生
-	Starving  bool //飢饉発生
-	Christian bool //キリシタン発生
-	TradePort bool
-	GoldMine  bool
-	Neighbors []string // 隣接する国のID (つながり)
+	ID          string
+	Name        string
+	Kokuryoku   int    // 国力
+	OwnerID     string // 所属プレイヤーID
+	Complete    bool   //完全支配かどうか
+	Castles     []Castle
+	Soldiers    int  // 兵士数
+	Restless    bool // 不穏状態
+	HasUprising bool // 一揆発生
+	Starving    bool //飢饉発生
+	Christian   bool //キリシタン発生
+	TradePort   bool
+	GoldMine    bool
+	Ikko        bool     //一向宗
+	Honganji    bool     //本願寺
+	Region      int      //地域
+	Neighbors   []string // 隣接する国のID (つながり)
 }
 
 // General represents a Sengoku Daimyo or vassal

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand/v2"
+	"sort"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -16,31 +17,10 @@ type model struct {
 }
 
 func initialModel() model {
-	provinces := map[string]*Province{
-		"owari": {
-			ID:        "owari",
-			Name:      "尾張",
-			Kokudaka:  10,
-			Neighbors: []string{"mikawa", "mino", "ise"},
-		},
-		"mikawa": {
-			ID:        "mikawa",
-			Name:      "三河",
-			Kokudaka:  5,
-			Neighbors: []string{"owari", "totomi", "shinano"},
-		},
-		"mino": {
-			ID:        "mino",
-			Name:      "美濃",
-			Kokudaka:  8,
-			Neighbors: []string{"owari", "omi", "echizen", "shinano"},
-		},
-	}
-
 	gs := &GameState{
 		Year:      1560,
 		Phase:     "順番決定フェイズ",
-		Provinces: provinces,
+		Provinces: InitializeProvinces(),
 		Generals:  InitializeGenerals(),
 		Cards:     InitializeCards(),
 		Order:     []int{0, 1, 2},
@@ -86,14 +66,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "ctrl+c", "q":
 			return m, tea.Quit
-			// case "up", "k":
-			// 	if m.cursor > 0 {
-			// 		m.cursor--
-			// 	}
-			// case "down", "j":
-			// 	if m.cursor < len(m.gameState.Provinces)-1 {
-			// 		m.cursor++
-			// 	}
+		case "up", "k":
+			if m.cursor > 0 {
+				m.cursor--
+			}
+		case "down", "j":
+			if m.cursor < len(m.gameState.Provinces)-1 {
+				m.cursor++
+			}
+		case "c": // 'c' key to switch to adjacency check phase
+			m.gameState.Phase = "国のつながり確認フェイズ"
 
 		}
 	}
@@ -106,7 +88,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 				m.gameState.Phase = "吉凶札配布フェイズ"
 				m.gameState.Order = MyShuffleInt(m.gameState.Order)
-				m.DistributeCards() //大名に吉凶カードを配る
+				m.DistributeCards()
 				return m, nil
 			}
 			return m, nil
@@ -153,7 +135,7 @@ func (m model) View() string {
 	case "順番決定フェイズ":
 		s.WriteString("\n\n")
 		s.WriteString("順番決定フェイズ:\n\n")
-		s.WriteString("\n(enter: 次のフェイズへ)\n")
+		s.WriteString("(enter: 次のフェイズへ, c: 国のつながり確認)\n")
 
 	case "吉凶札配布フェイズ":
 		s.WriteString("\n\n")
@@ -175,7 +157,14 @@ func (m model) View() string {
 		s.WriteString("\n\n")
 		s.WriteString("国のつながり確認フェイズ:\n\n")
 
-		ids := []string{"owari", "mikawa", "mino"}
+		// Sort IDs for consistent display
+		ids := make([]string, 0, len(m.gameState.Provinces))
+		for id := range m.gameState.Provinces {
+			ids = append(ids, id)
+		}
+		// Simple alphabetical sort for now (ideally by Region)
+		sort.Strings(ids)
+
 		for i, id := range ids {
 			p := m.gameState.Provinces[id]
 			cursor := "  "
@@ -192,7 +181,7 @@ func (m model) View() string {
 				}
 			}
 
-			line := fmt.Sprintf("%s%s (隣接: %s)", cursor, p.Name, strings.Join(neighborNames, ", "))
+			line := fmt.Sprintf("%s%s [地域%d] (隣接: %s)", cursor, p.Name, p.Region, strings.Join(neighborNames, ", "))
 			if m.cursor == i {
 				s.WriteString(selectedStyle.Render(line))
 			} else {
