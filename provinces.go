@@ -2,96 +2,93 @@ package main
 
 func InitializeProvinces() map[string]*Province {
 	provinces := map[string]*Province{
-		// --- 地域 1 (東北) ---
-		"mutsu_kita":   {ID: "mutsu_kita", Name: "陸奥(北)", Kokuryoku: 6, Region: 1, Neighbors: []string{"mutsu_naka"}},
-		"mutsu_naka":   {ID: "mutsu_naka", Name: "陸奥(中)", Kokuryoku: 12, Region: 1, Neighbors: []string{"mutsu_kita", "mutsu_minami"}},           // 出羽とは山脈で遮断
-		"mutsu_minami": {ID: "mutsu_minami", Name: "陸奥(南)", Kokuryoku: 16, Region: 1, Neighbors: []string{"mutsu_naka", "kozuke", "shimotsuke"}}, // 常陸とは山脈で遮断
-		"dewa":         {ID: "dewa", Name: "出羽", Kokuryoku: 12, Region: 1, Neighbors: []string{"kozuke"}},                                        // 陸奥、越後とは山脈で遮断
+		// --- 地域 1 ---
+		"陸奥(北)": {ID: "陸奥(北)", Name: "陸奥(北)", Kokuryoku: 6, Region: 1, Neighbors: []string{"陸奥(中)", "出羽"}},
+		"陸奥(中)": {ID: "陸奥(中)", Name: "陸奥(中)", Kokuryoku: 12, Region: 1, Neighbors: []string{"陸奥(北)", "陸奥(南)", "出羽"}},
+		"陸奥(南)": {ID: "陸奥(南)", Name: "陸奥(南)", Kokuryoku: 16, Region: 1, Neighbors: []string{"陸奥(中)", "下野", "常陸", "出羽", "越後"}},
+		"出羽":    {ID: "出羽", Name: "出羽", Kokuryoku: 12, Region: 1, Neighbors: []string{"陸奥(北)", "陸奥(中)", "陸奥(南)", "越後"}},
 
-		// --- 地域 2 (坂東) ---
-		"musashi": {ID: "musashi", Name: "武蔵", Kokuryoku: 16, Region: 2, Neighbors: []string{"sagami", "kozuke", "shimosa"}}, // 甲斐とは山脈
-		"sagami":  {ID: "sagami", Name: "相模", Kokuryoku: 6, Region: 2, Neighbors: []string{"musashi", "suruga", "izu"}},
-		"kazusa":  {ID: "kazusa", Name: "上総", Kokuryoku: 10, Region: 2, Neighbors: []string{"awa", "shimosa"}},
-		"awa":     {ID: "awa", Name: "安房", Kokuryoku: 2, Region: 2, Neighbors: []string{"kazusa"}},
-		"izu":     {ID: "izu", Name: "伊豆", Kokuryoku: 2, Region: 2, Neighbors: []string{"sagami", "suruga"}},
+		// --- 地域 2 ---
+		"武蔵": {ID: "武蔵", Name: "武蔵", Kokuryoku: 16, Region: 2, Neighbors: []string{"相模", "上野", "下総", "甲斐"}},
+		"相模": {ID: "相模", Name: "相模", Kokuryoku: 6, Region: 2, Neighbors: []string{"武蔵", "伊豆"}},
+		"上総": {ID: "上総", Name: "上総", Kokuryoku: 10, Region: 2, Neighbors: []string{"安房", "下総"}},
+		"安房": {ID: "安房", Name: "安房", Kokuryoku: 2, Region: 2, Neighbors: []string{"上総"}},
+		"下総": {ID: "下総", Name: "下総", Kokuryoku: 10, Region: 2, Neighbors: []string{"常陸", "下野", "武蔵", "上総", "上野"}},
+		"常陸": {ID: "常陸", Name: "常陸", Kokuryoku: 14, Region: 2, Neighbors: []string{"下野", "下総", "陸奥(南)"}},
 
-		// --- 地域 3 (関東) ---
-		"shimotsuke": {ID: "shimotsuke", Name: "下野", Kokuryoku: 10, Region: 3, Neighbors: []string{"mutsu_minami", "kozuke", "hitachi", "shimosa"}},
-		"kozuke":     {ID: "kozuke", Name: "上野", Kokuryoku: 12, Region: 3, Neighbors: []string{"mutsu_minami", "dewa", "shimotsuke", "musashi", "shinano_kita"}},
-		"hitachi":    {ID: "hitachi", Name: "常陸", Kokuryoku: 14, Region: 3, Neighbors: []string{"shimotsuke", "shimosa"}},
-		"shimosa":    {ID: "shimosa", Name: "下総", Kokuryoku: 10, Region: 3, Neighbors: []string{"hitachi", "shimotsuke", "musashi", "kazusa"}},
+		// --- 地域 3 ---
+		"下野":    {ID: "下野", Name: "下野", Kokuryoku: 10, Region: 3, Neighbors: []string{"陸奥(南)", "上野", "常陸", "下総"}},
+		"上野":    {ID: "上野", Name: "上野", Kokuryoku: 12, Region: 3, Neighbors: []string{"下野", "武蔵", "信濃(北)", "下総", "越後"}},
+		"信濃(北)": {ID: "信濃(北)", Name: "信濃(北)", Kokuryoku: 8, Region: 3, Neighbors: []string{"上野", "越後", "信濃(南)", "甲斐"}},
+		"信濃(南)": {ID: "信濃(南)", Name: "信濃(南)", Kokuryoku: 6, Region: 3, Neighbors: []string{"信濃(北)", "甲斐", "三河", "尾張", "美濃", "遠江"}},
+		"甲斐":    {ID: "甲斐", Name: "甲斐", Kokuryoku: 6, Region: 3, Neighbors: []string{"信濃(南)", "駿河", "武蔵", "信濃(北)"}, GoldMine: true},
 
-		// --- 地域 4 (北陸) ---
-		"echigo":  {ID: "echigo", Name: "越後", Kokuryoku: 14, Region: 4, Neighbors: []string{"shinano_kita", "shinano_minami"}}, // 出羽、越中とは山脈
-		"sado":    {ID: "sado", Name: "佐渡", Kokuryoku: 2, Region: 4, Neighbors: []string{}, GoldMine: true},                    // 島
-		"etchu":   {ID: "etchu", Name: "越中", Kokuryoku: 12, Region: 4, Neighbors: []string{"noto", "kaga", "shinano_kita"}},    // 越後、飛騨とは山脈
-		"noto":    {ID: "noto", Name: "能登", Kokuryoku: 6, Region: 4, Neighbors: []string{"etchu", "kaga"}},
-		"kaga":    {ID: "kaga", Name: "加賀", Kokuryoku: 10, Region: 4, Neighbors: []string{"etchu", "noto", "echizen"}, Ikko: true},
-		"echizen": {ID: "echizen", Name: "越前", Kokuryoku: 14, Region: 4, Neighbors: []string{"kaga", "wakasa"}, Ikko: true}, // 近江とは山脈
+		// --- 地域 4 ---
+		"越後": {ID: "越後", Name: "越後", Kokuryoku: 14, Region: 4, Neighbors: []string{"信濃(北)", "信濃(南)", "出羽", "越中", "上野", "陸奥(南)"}, GoldMine: true},
+		"越中": {ID: "越中", Name: "越中", Kokuryoku: 12, Region: 4, Neighbors: []string{"能登", "加賀", "越後", "飛騨"}, Ikko: true},
+		"能登": {ID: "能登", Name: "能登", Kokuryoku: 6, Region: 4, Neighbors: []string{"越中", "加賀"}},
+		"加賀": {ID: "加賀", Name: "加賀", Kokuryoku: 10, Region: 4, Neighbors: []string{"越中", "能登", "越前"}, Ikko: true},
+		"越前": {ID: "越前", Name: "越前", Kokuryoku: 14, Region: 4, Neighbors: []string{"加賀", "若狭", "近江(北)"}, Ikko: true},
+		"若狭": {ID: "若狭", Name: "若狭", Kokuryoku: 2, Region: 4, Neighbors: []string{"越前", "近江(北)", "丹後", "丹波"}},
 
-		// --- 地域 5 (中部) ---
-		"shinano_kita":   {ID: "shinano_kita", Name: "信濃(北)", Kokuryoku: 8, Region: 5, Neighbors: []string{"kozuke", "echigo", "etchu", "shinano_minami"}}, // 飛騨とは山脈
-		"shinano_minami": {ID: "shinano_minami", Name: "信濃(南)", Kokuryoku: 6, Region: 5, Neighbors: []string{"shinano_kita", "echigo", "kai", "mikawa", "owari", "mino"}},
-		"hida":           {ID: "hida", Name: "飛騨", Kokuryoku: 2, Region: 5, Neighbors: []string{}, GoldMine: true},          // 四方を山脈に囲まれている？（地図上は山脈記号あり）
-		"kai":            {ID: "kai", Name: "甲斐", Kokuryoku: 6, Region: 5, Neighbors: []string{"shinano_minami", "suruga"}}, // 武蔵とは山脈
-		"suruga":         {ID: "suruga", Name: "駿河", Kokuryoku: 6, Region: 5, Neighbors: []string{"sagami", "izu", "kai", "totomi"}},
-		"totomi":         {ID: "totomi", Name: "遠江", Kokuryoku: 6, Region: 5, Neighbors: []string{"suruga", "mikawa"}},
-		"mikawa":         {ID: "mikawa", Name: "三河", Kokuryoku: 8, Region: 5, Neighbors: []string{"totomi", "shinano_minami", "owari"}},
+		// --- 地域 5 ---
+		"伊豆": {ID: "伊豆", Name: "伊豆", Kokuryoku: 2, Region: 5, Neighbors: []string{"相模", "駿河"}},
+		"駿河": {ID: "駿河", Name: "駿河", Kokuryoku: 6, Region: 5, Neighbors: []string{"伊豆", "甲斐", "遠江"}, GoldMine: true},
+		"遠江": {ID: "遠江", Name: "遠江", Kokuryoku: 6, Region: 5, Neighbors: []string{"駿河", "三河"}},
+		"三河": {ID: "三河", Name: "三河", Kokuryoku: 8, Region: 5, Neighbors: []string{"遠江", "信濃(南)", "尾張"}, Ikko: true},
+		"尾張": {ID: "尾張", Name: "尾張", Kokuryoku: 14, Region: 5, Neighbors: []string{"三河", "美濃", "伊勢", "近江(南)"}},
+		"伊勢": {ID: "伊勢", Name: "伊勢", Kokuryoku: 18, Region: 5, Neighbors: []string{"尾張", "美濃", "近江(南)", "伊賀", "大和", "紀伊"}, Ikko: true, Honganji: true},
 
-		// --- 地域 6 (畿内・東海) ---
-		"owari":      {ID: "owari", Name: "尾張", Kokuryoku: 14, Region: 6, Neighbors: []string{"mikawa", "shinano_minami", "mino", "ise"}},
-		"mino":       {ID: "mino", Name: "美濃", Kokuryoku: 14, Region: 6, Neighbors: []string{"owari", "shinano_minami", "omi_kita", "ise"}},       // 飛騨、近江南とは山脈
-		"omi_kita":   {ID: "omi_kita", Name: "近江(北)", Kokuryoku: 10, Region: 6, Neighbors: []string{"mino", "omi_minami", "yamashiro", "wakasa"}}, // 越前とは山脈
-		"omi_minami": {ID: "omi_minami", Name: "近江(南)", Kokuryoku: 14, Region: 6, Neighbors: []string{"omi_kita", "yamashiro", "iga", "ise"}},     // 美濃とは山脈
-		"ise":        {ID: "ise", Name: "伊勢", Kokuryoku: 18, Region: 6, Neighbors: []string{"owari", "mino", "omi_minami", "iga", "yamato", "kii"}},
-		"iga":        {ID: "iga", Name: "伊賀", Kokuryoku: 2, Region: 6, Neighbors: []string{"ise", "omi_minami", "yamato"}},
-		"yamato":     {ID: "yamato", Name: "大和", Kokuryoku: 12, Region: 6, Neighbors: []string{"ise", "iga", "kii", "kawachi"}},
-		"kii":        {ID: "kii", Name: "紀伊", Kokuryoku: 6, Region: 6, Neighbors: []string{"ise", "yamato", "izumi"}},
-		"yamashiro":  {ID: "yamashiro", Name: "山城", Kokuryoku: 14, Region: 6, Neighbors: []string{"omi_kita", "omi_minami", "settsu", "kawachi", "tamba"}},
-		"settsu":     {ID: "settsu", Name: "摂津", Kokuryoku: 10, Region: 6, Neighbors: []string{"yamashiro", "izumi", "kawachi", "harima", "tamba"}, Honganji: true},
-		"kawachi":    {ID: "kawachi", Name: "河内", Kokuryoku: 6, Region: 6, Neighbors: []string{"yamashiro", "yamato", "settsu", "izumi"}},
-		"izumi":      {ID: "izumi", Name: "和泉", Kokuryoku: 2, Region: 6, Neighbors: []string{"settsu", "kawachi", "kii"}},
+		// --- 地域 6 ---
+		"飛騨":   {ID: "飛騨", Name: "飛騨", Kokuryoku: 2, Region: 6, Neighbors: []string{"越中", "美濃"}},
+		"美濃":   {ID: "美濃", Name: "美濃", Kokuryoku: 14, Region: 6, Neighbors: []string{"尾張", "信濃(南)", "近江(北)", "伊勢", "飛騨", "近江(南)"}},
+		"近江(北)": {ID: "近江(北)", Name: "近江(北)", Kokuryoku: 10, Region: 6, Neighbors: []string{"美濃", "近江(南)", "若狭", "越前"}},
+		"近江(南)": {ID: "近江(南)", Name: "近江(南)", Kokuryoku: 14, Region: 6, Neighbors: []string{"近江(北)", "山城", "伊賀", "伊勢", "美濃"}, Ikko: true},
+		"伊賀":   {ID: "伊賀", Name: "伊賀", Kokuryoku: 2, Region: 6, Neighbors: []string{"伊勢", "近江(南)", "大和", "山城"}},
 
-		// --- 地域 7 (山陽) ---
-		"harima":  {ID: "harima", Name: "播磨", Kokuryoku: 12, Region: 7, Neighbors: []string{"settsu", "tamba", "bizen", "mimasaka"}},
-		"bizen":   {ID: "bizen", Name: "備前", Kokuryoku: 8, Region: 7, Neighbors: []string{"harima", "mimasaka", "bit_chu"}},
-		"bit_chu": {ID: "bit_chu", Name: "備中", Kokuryoku: 6, Region: 7, Neighbors: []string{"bizen", "mimasaka", "bingo"}},
-		"bingo":   {ID: "bingo", Name: "備後", Kokuryoku: 6, Region: 7, Neighbors: []string{"bit_chu", "aki"}}, // 備中、美作、伯耆とは山脈
-		"aki":     {ID: "aki", Name: "安芸", Kokuryoku: 6, Region: 7, Neighbors: []string{"bingo", "suo"}},
-		"suo":     {ID: "suo", Name: "周防", Kokuryoku: 6, Region: 7, Neighbors: []string{"aki", "nagato"}},
-		"nagato":  {ID: "nagato", Name: "長門", Kokuryoku: 4, Region: 7, Neighbors: []string{"suo"}},
+		// --- 地域 7 ---
+		"大和": {ID: "大和", Name: "大和", Kokuryoku: 12, Region: 7, Neighbors: []string{"伊勢", "伊賀", "紀伊", "河内", "山城"}},
+		"山城": {ID: "山城", Name: "山城", Kokuryoku: 14, Region: 7, Neighbors: []string{"近江(南)", "摂津", "河内", "丹波", "大和", "伊賀"}},
+		"摂津": {ID: "摂津", Name: "摂津", Kokuryoku: 10, Region: 7, Neighbors: []string{"山城", "和泉", "河内", "播磨", "丹波"}, Honganji: true, Ikko: true},
+		"河内": {ID: "河内", Name: "河内", Kokuryoku: 6, Region: 7, Neighbors: []string{"山城", "大和", "摂津", "和泉", "紀伊"}},
+		"和泉": {ID: "和泉", Name: "和泉", Kokuryoku: 2, Region: 7, Neighbors: []string{"摂津", "河内", "紀伊"}, TradePort: true},
+		"播磨": {ID: "播磨", Name: "播磨", Kokuryoku: 12, Region: 7, Neighbors: []string{"摂津", "丹波", "備前", "美作", "因幡", "但馬"}},
+		"周防": {ID: "周防", Name: "周防", Kokuryoku: 6, Region: 7, Neighbors: []string{"安芸", "長門", "石見"}},
+		"丹波": {ID: "丹波", Name: "丹波", Kokuryoku: 6, Region: 7, Neighbors: []string{"山城", "摂津", "播磨", "丹後", "但馬", "若狭"}},
 
-		// --- 地域 8 (山陰) ---
-		"wakasa": {ID: "wakasa", Name: "若狭", Kokuryoku: 2, Region: 8, Neighbors: []string{"echizen", "omi_kita", "tango"}},
-		"tango":  {ID: "tango", Name: "丹後", Kokuryoku: 4, Region: 8, Neighbors: []string{"wakasa", "tajima", "tamba"}},
-		"tajima": {ID: "tajima", Name: "但馬", Kokuryoku: 4, Region: 8, Neighbors: []string{"tango", "inaba", "tamba"}},
-		"inaba":  {ID: "inaba", Name: "因幡", Kokuryoku: 4, Region: 8, Neighbors: []string{"tajima", "hoki"}},
-		"hoki":   {ID: "hoki", Name: "伯耆", Kokuryoku: 12, Region: 8, Neighbors: []string{"inaba", "izumo"}, GoldMine: true}, // 備後とは山脈
-		"izumo":  {ID: "izumo", Name: "出雲", Kokuryoku: 6, Region: 8, Neighbors: []string{"hoki", "iwami"}, GoldMine: true},
-		"iwami":  {ID: "iwami", Name: "石見", Kokuryoku: 4, Region: 8, Neighbors: []string{"izumo"}, GoldMine: true},
+		// --- 地域 8 ---
+		"長門": {ID: "長門", Name: "長門", Kokuryoku: 4, Region: 8, Neighbors: []string{"周防", "石見", "豊前"}},
+		"丹後": {ID: "丹後", Name: "丹後", Kokuryoku: 4, Region: 8, Neighbors: []string{"若狭", "但馬", "丹波"}},
+		"但馬": {ID: "但馬", Name: "但馬", Kokuryoku: 4, Region: 8, Neighbors: []string{"丹後", "因幡", "丹波", "播磨"}, GoldMine: true},
+		"因幡": {ID: "因幡", Name: "因幡", Kokuryoku: 4, Region: 8, Neighbors: []string{"但馬", "伯耆", "美作", "播磨"}},
+		"伯耆": {ID: "伯耆", Name: "伯耆", Kokuryoku: 12, Region: 8, Neighbors: []string{"因幡", "出雲", "備後", "美作", "備中"}},
+		"出雲": {ID: "出雲", Name: "出雲", Kokuryoku: 6, Region: 8, Neighbors: []string{"伯耆", "備後", "石見"}},
+		"石見": {ID: "石見", Name: "石見", Kokuryoku: 4, Region: 8, Neighbors: []string{"出雲", "安芸", "周防", "長門"}, GoldMine: true},
 
-		// 中間領域 (tamba, mimasaka)
-		"tamba":    {ID: "tamba", Name: "丹波", Kokuryoku: 6, Region: 8, Neighbors: []string{"yamashiro", "settsu", "harima", "tango", "tajima"}},
-		"mimasaka": {ID: "mimasaka", Name: "美作", Kokuryoku: 6, Region: 7, Neighbors: []string{"harima", "bizen", "bit_chu"}}, // 伯耆、備後とは山脈
+		// --- 地域 9 ---
+		"備前": {ID: "備前", Name: "備前", Kokuryoku: 8, Region: 9, Neighbors: []string{"播磨", "美作", "備中"}},
+		"備中": {ID: "備中", Name: "備中", Kokuryoku: 6, Region: 9, Neighbors: []string{"備前", "美作", "備後", "伯耆"}},
+		"備後": {ID: "備後", Name: "備後", Kokuryoku: 6, Region: 9, Neighbors: []string{"備中", "安芸", "出雲", "伯耆", "石見"}},
+		"安芸": {ID: "安芸", Name: "安芸", Kokuryoku: 6, Region: 9, Neighbors: []string{"備後", "周防", "石見"}},
+		"美作": {ID: "美作", Name: "美作", Kokuryoku: 6, Region: 9, Neighbors: []string{"播磨", "備前", "備中", "伯耆", "因幡"}},
+		"讃岐": {ID: "讃岐", Name: "讃岐", Kokuryoku: 4, Region: 9, Neighbors: []string{"阿波", "伊予"}},
+		"伊予": {ID: "伊予", Name: "伊予", Kokuryoku: 10, Region: 9, Neighbors: []string{"讃岐", "土佐"}},
 
-		// --- 地域 9 (四国) ---
-		"awa_shikoku": {ID: "awa_shikoku", Name: "阿波", Kokuryoku: 6, Region: 9, Neighbors: []string{"sanuki", "tosa"}},
-		"sanuki":      {ID: "sanuki", Name: "讃岐", Kokuryoku: 4, Region: 9, Neighbors: []string{"awa_shikoku", "iyo"}},
-		"tosa":        {ID: "tosa", Name: "土佐", Kokuryoku: 6, Region: 9, Neighbors: []string{"awa_shikoku", "iyo"}},
-		"iyo":         {ID: "iyo", Name: "伊予", Kokuryoku: 10, Region: 9, Neighbors: []string{"sanuki", "tosa"}},
+		// --- 地域 10 ---
+		"紀伊": {ID: "紀伊", Name: "紀伊", Kokuryoku: 6, Region: 10, Neighbors: []string{"伊勢", "大和", "和泉", "河内"}},
+		"阿波": {ID: "阿波", Name: "阿波", Kokuryoku: 6, Region: 10, Neighbors: []string{"讃岐", "土佐", "伊予"}},
+		"土佐": {ID: "土佐", Name: "土佐", Kokuryoku: 6, Region: 10, Neighbors: []string{"阿波", "伊予"}},
+		"日向": {ID: "日向", Name: "日向", Kokuryoku: 4, Region: 10, Neighbors: []string{"豊後", "肥後", "大隅"}},
+		"薩摩": {ID: "薩摩", Name: "薩摩", Kokuryoku: 8, Region: 10, Neighbors: []string{"肥後", "大隅"}},
+		"大隅": {ID: "大隅", Name: "大隅", Kokuryoku: 6, Region: 10, Neighbors: []string{"日向", "薩摩"}},
 
-		// --- 地域 10 (南九州) ---
-		"higo":    {ID: "higo", Name: "肥後", Kokuryoku: 12, Region: 10, Neighbors: []string{"chikugo", "bungo", "hyuga", "satsuma"}},
-		"hyuga":   {ID: "hyuga", Name: "日向", Kokuryoku: 4, Region: 10, Neighbors: []string{"bungo", "higo", "osumi"}},
-		"satsuma": {ID: "satsuma", Name: "薩摩", Kokuryoku: 8, Region: 10, Neighbors: []string{"higo", "osumi"}},
-		"osumi":   {ID: "osumi", Name: "大隅", Kokuryoku: 6, Region: 10, Neighbors: []string{"hyuga", "satsuma"}},
-
-		// --- 地域 11 (北九州) ---
-		"chikuzen": {ID: "chikuzen", Name: "筑前", Kokuryoku: 12, Region: 11, Neighbors: []string{"buzen", "hizen", "chikugo"}},
-		"buzen":    {ID: "buzen", Name: "豊前", Kokuryoku: 6, Region: 11, Neighbors: []string{"chikuzen", "chikugo", "bungo"}},
-		"hizen":    {ID: "hizen", Name: "肥前", Kokuryoku: 10, Region: 11, Neighbors: []string{"chikuzen", "chikugo"}},
-		"chikugo":  {ID: "chikugo", Name: "筑後", Kokuryoku: 8, Region: 11, Neighbors: []string{"chikuzen", "buzen", "hizen", "bungo", "higo"}},
-		"bungo":    {ID: "bungo", Name: "豊後", Kokuryoku: 12, Region: 11, Neighbors: []string{"buzen", "chikugo", "higo", "hyuga"}},
+		// --- 地域 11 ---
+		"肥後": {ID: "肥後", Name: "肥後", Kokuryoku: 12, Region: 11, Neighbors: []string{"筑後", "豊後", "日向", "薩摩"}},
+		"筑前": {ID: "筑前", Name: "筑前", Kokuryoku: 12, Region: 11, Neighbors: []string{"豊前", "肥前", "筑後", "豊後"}, TradePort: true},
+		"豊前": {ID: "豊前", Name: "豊前", Kokuryoku: 6, Region: 11, Neighbors: []string{"筑前", "長門", "豊後"}},
+		"肥前": {ID: "肥前", Name: "肥前", Kokuryoku: 10, Region: 11, Neighbors: []string{"筑前", "筑後"}, TradePort: true},
+		"筑後": {ID: "筑後", Name: "筑後", Kokuryoku: 8, Region: 11, Neighbors: []string{"筑前", "肥前", "豊後", "肥後"}},
+		"豊後": {ID: "豊後", Name: "豊後", Kokuryoku: 12, Region: 11, Neighbors: []string{"豊前", "筑後", "肥後", "日向", "筑前"}, TradePort: true},
 	}
 
 	return provinces
