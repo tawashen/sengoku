@@ -29,19 +29,58 @@ func initialModel() model {
 
 	// プレイヤーの初期化 (武将データからの参照)
 	nobunaga := gs.Generals["織田信長"]
+	nobunaga.Stipend = 0
+	nobunaga.ProvinceID = "尾張"
+	nobunaga.OwnerID = "織田"
+
+	// 大名（プレイヤー）としての拡張フィールド
 	nobunaga.Gold = 100
 	nobunaga.Clan = "織田"
 	nobunaga.IsAI = false
+	nobunaga.Vassals = []*General{}
+	nobunaga.Vassals = append(nobunaga.Vassals, gs.Generals["柴田勝家"])
+	nobunaga.Vassals = append(nobunaga.Vassals, gs.Generals["滝川一益"])
+	nobunaga.Vassals = append(nobunaga.Vassals, gs.Generals["明智光秀"])
+	nobunaga.Provinces = []*Province{}
+	nobunaga.Provinces = append(nobunaga.Provinces, gs.Provinces["尾張"])
+	nobunaga.Provinces = append(nobunaga.Provinces, gs.Provinces["美濃"])
+	nobunaga.Power = 0 //後で国力計算メソッド必要
+	nobunaga.EventC = Card{}
+	nobunaga.SecretC = []Card{}
 
 	shingen := gs.Generals["武田信玄"]
+	shingen.Stipend = 0
+	shingen.ProvinceID = "甲斐"
+	shingen.OwnerID = "武田"
 	shingen.Gold = 100
 	shingen.Clan = "武田"
 	shingen.IsAI = false
+	shingen.Vassals = []*General{}
+	shingen.Vassals = append(shingen.Vassals, gs.Generals["武田勝頼"])
+	shingen.Vassals = append(shingen.Vassals, gs.Generals["武田信廉"])
+	shingen.Provinces = []*Province{}
+	shingen.Provinces = append(shingen.Provinces, gs.Provinces["甲斐"])
+	shingen.Provinces = append(shingen.Provinces, gs.Provinces["信濃"])
+	shingen.Power = 0 //後で国力計算メソッド必要
+	shingen.EventC = Card{}
+	shingen.SecretC = []Card{}
 
 	kenshin := gs.Generals["上杉謙信"]
+	kenshin.Stipend = 0
+	kenshin.ProvinceID = "越後"
+	kenshin.OwnerID = "上杉"
 	kenshin.Gold = 100
 	kenshin.Clan = "上杉"
 	kenshin.IsAI = false
+	kenshin.Vassals = []*General{}
+	kenshin.Vassals = append(kenshin.Vassals, gs.Generals["上杉景勝"])
+	kenshin.Vassals = append(kenshin.Vassals, gs.Generals["上杉景虎"])
+	kenshin.Provinces = []*Province{}
+	kenshin.Provinces = append(kenshin.Provinces, gs.Provinces["越後"])
+	kenshin.Provinces = append(kenshin.Provinces, gs.Provinces["越中"])
+	kenshin.Power = 0 //後で国力計算メソッド必要
+	kenshin.EventC = Card{}
+	kenshin.SecretC = []Card{}
 
 	gs.Players = [][]*General{
 		{nobunaga},

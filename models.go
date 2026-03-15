@@ -7,7 +7,7 @@ type Province struct {
 	Kokuryoku   int    // 国力
 	OwnerID     string // 所属プレイヤーID
 	Complete    bool   //完全支配かどうか
-	Castles     []Castle
+	Castles     []*Castle
 	Soldiers    int  // 兵士数
 	Restless    bool // 不穏状態
 	HasUprising bool // 一揆発生
@@ -79,6 +79,14 @@ type GameState struct {
 	Order     []int        // 大名のIndex用
 	Cards     []Card
 	CardCount int //Card選択用カウンター
+}
+
+type Scenario struct {
+	Title     string
+	Member    int
+	Provinces map[string]*Province //そのままGSにコピー
+	Generals  map[string]*General  //そのままGSにコピー
+	Players   [][]*General         //そのままGSにコピー
 }
 
 // Helper: Check if two provinces are neighbors
