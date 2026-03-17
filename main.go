@@ -18,14 +18,23 @@ type model struct {
 
 func initialModel() model {
 	gs := &GameState{
-		Year:      1560,
-		Phase:     "順番決定フェイズ",
-		Provinces: InitializeProvinces(),
-		Generals:  InitializeGenerals(),
-		Cards:     InitializeCards(),
-		Order:     []int{0, 1, 2},
-		CardCount: 0,
+		Year:           1560,
+		Phase:          "順番決定フェイズ",
+		Provinces:      InitializeProvinces(),
+		Cards:          InitializeCards(),
+		Order:          []int{0, 1, 2},
+		CardCount:      0,
+		GeneralCounter: 0,
+		GeneralsList:   []*General{},
+		Message:        "",
 	}
+
+	m := model{
+		gameState: gs,
+		cursor:    0,
+	}
+
+	gs.Generals = m.InitializeGenerals()
 
 	// プレイヤーの初期化 (武将データからの参照)
 	nobunaga := gs.Generals["織田信長"]
@@ -47,6 +56,27 @@ func initialModel() model {
 	nobunaga.Power = 0 //後で国力計算メソッド必要
 	nobunaga.EventC = Card{}
 	nobunaga.SecretC = []Card{}
+
+	//尾張の初期化
+	owari := gs.Provinces["尾張"]
+	owari.OwnerID = "織田"
+	owari.Complete = true
+	owari.Castles = []*Castle{}
+	owari.Castles = append(owari.Castles, &Castle{
+		Ruler: "織田",
+		Power: 5,
+	})
+	owari.Soldiers = 1
+	owari.Restless = false
+	owari.HasUprising = false
+	owari.Starving = false
+	owari.Christian = false
+	owari.TradePort = false
+	owari.GoldMine = false
+	owari.Ikko = false
+	owari.Honganji = false
+	owari.Region = 1
+	owari.Neighbors = []string{"美濃", "三河", "伊勢"}
 
 	shingen := gs.Generals["武田信玄"]
 	shingen.Stipend = 0
@@ -125,13 +155,45 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
-				m.gameState.Phase = "吉凶札配布フェイズ"
+				m.gameState.Phase = "武将登用フェイズ"
 				m.gameState.Order = MyShuffleInt(m.gameState.Order)
 				m.DistributeCards()
 				return m, nil
 			}
 			return m, nil
 		}
+
+	case "武将登用フェイズ":
+		// 安全装置：もしGeneralsListが空ならスキップ
+		if len(m.gameState.GeneralsList) == 0 {
+			m.gameState.Phase = "吉凶札配布フェイズ"
+			return m, nil
+		}
+		
+		if m.gameState.GeneralCounter >= len(m.gameState.GeneralsList) {
+			m.gameState.GeneralCounter = 0
+			m.gameState.Phase = "吉凶札配布フェイズ"
+			return m, nil
+		}
+
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "n":
+				m.gameState.Message = "-> 不採用"
+				m.gameState.GeneralCounter++
+				return m, nil
+			case "y":
+				m.gameState.Message = "-> 採用"
+				// 現在の順番のプレイヤーの大名配下に追加する
+				currentPlayerIdx := m.gameState.Order[0]
+				m.gameState.Players[currentPlayerIdx] = append(m.gameState.Players[currentPlayerIdx], m.gameState.GeneralsList[m.gameState.GeneralCounter])
+				m.gameState.GeneralCounter++
+				return m, nil
+			}
+		}
+		return m, nil
+
 	case "吉凶札配布フェイズ":
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
@@ -175,6 +237,13 @@ func (m model) View() string {
 		s.WriteString("\n\n")
 		s.WriteString("順番決定フェイズ:\n\n")
 		s.WriteString("(enter: 次のフェイズへ, c: 国のつながり確認)\n")
+
+	case "武将登用フェイズ":
+		s.WriteString("\n\n")
+		s.WriteString("武将登用フェイズ:\n\n")
+		s.WriteString(fmt.Sprintf("現在のプレイヤー: %s\n", m.gameState.Players[m.gameState.Order[0]][0].Name))
+		s.WriteString(fmt.Sprintf("%s　この武将を採用しますか？(y/n)\n", m.gameState.GeneralsList[m.gameState.GeneralCounter].Name))
+		s.WriteString(m.gameState.Message)
 
 	case "吉凶札配布フェイズ":
 		s.WriteString("\n\n")

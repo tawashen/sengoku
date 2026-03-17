@@ -1,6 +1,6 @@
 package main
 
-func InitializeGenerals() map[string]*General {
+func (m *model) InitializeGenerals() map[string]*General {
 	generals := make(map[string]*General)
 
 	data := []General{
@@ -46,10 +46,16 @@ func InitializeGenerals() map[string]*General {
 		{Name: "北条早雲", Combat: 3, Politics: 4, Prestige: 2, Stipend: 1, Loyalty: 0, PlusLoyalty: -2},
 	}
 
-	for _, g := range data {
+	var genList []*General
+
+	for i := range data {
+		g := &data[i]
 		g.ID = g.Name
-		generals[g.ID] = &g
+		generals[g.ID] = g
+		genList = append(genList, g)
 	}
+
+	m.gameState.GeneralsList = genList
 
 	return generals
 }

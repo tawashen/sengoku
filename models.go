@@ -10,7 +10,7 @@ type Province struct {
 	Castles     []*Castle
 	Soldiers    int  // 兵士数
 	Restless    bool // 不穏状態
-	HasUprising bool // 一揆発生
+	HasUprising bool // 国一揆発生
 	Starving    bool //飢饉発生
 	Christian   bool //キリシタン発生
 	TradePort   bool
@@ -19,6 +19,16 @@ type Province struct {
 	Honganji    bool     //本願寺
 	Region      int      //地域
 	Neighbors   []string // 隣接する国のID (つながり)
+}
+
+type Castle struct {
+	Ruler         string //大名のID もしくは中立
+	Power         int    //1につき1000人
+	IkkouUprising bool   //一揆発生
+	DoUprising    bool   //土一揆
+	//ProvinceUprising bool   //国一揆
+	Isolated   bool //孤立中
+	Surrounded bool //包囲中
 }
 
 // General represents a Sengoku Daimyo or vassal
@@ -47,16 +57,6 @@ type General struct {
 	SecretC   []Card      // 秘密札
 }
 
-type Castle struct {
-	Ruler            string //大名のID もしくは中立
-	Power            int    //1につき1000人
-	IkkouUprising    bool   //一揆発生
-	DoUprising       bool   //土一揆
-	ProvinceUprising bool   //国一揆
-	Isolated         bool   //孤立中
-	Surrounded       bool   //包囲中
-}
-
 type Card struct {
 	Name        string //キーはこれを使う
 	Description string //説明内容
@@ -71,14 +71,17 @@ type Dice struct {
 
 // GameState holds the entire game world data
 type GameState struct {
-	Year      int
-	Phase     string
-	Provinces map[string]*Province
-	Generals  map[string]*General
-	Players   [][]*General // 各プレイヤーごとの武将リスト（[0]がそのプレイヤーの大名）
-	Order     []int        // 大名のIndex用
-	Cards     []Card
-	CardCount int //Card選択用カウンター
+	Year           int
+	Phase          string
+	Provinces      map[string]*Province
+	Generals       map[string]*General
+	GeneralsList   []*General   //武将リスト
+	Players        [][]*General // 各プレイヤーごとの武将リスト（[0]がそのプレイヤーの大名）
+	Order          []int        // 大名のIndex用
+	Cards          []Card
+	CardCount      int //Card選択用カウンター
+	GeneralCounter int //武将選択用カウンター
+	Message        string
 }
 
 type Scenario struct {
