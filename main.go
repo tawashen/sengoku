@@ -25,6 +25,7 @@ func initialModel() model {
 		Order:          []int{0, 1, 2},
 		CardCount:      0,
 		GeneralCounter: 0,
+		PlayerCounter:  0,
 		GeneralsList:   []*General{},
 		Message:        "",
 	}
@@ -169,9 +170,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.gameState.Phase = "吉凶札配布フェイズ"
 			return m, nil
 		}
-		
+
+		// (Game initialization/Round start should shuffle GeneralsList if needed)
 		if m.gameState.GeneralCounter >= len(m.gameState.GeneralsList) {
-			m.gameState.GeneralCounter = 0
+			m.gameState.Phase = "吉凶札配布フェイズ"
+			return m, nil
+		}
+
+		// 全員のターンが終わったら次のフェイズへ
+		if m.gameState.PlayerCounter >= len(m.gameState.Players) {
+			m.gameState.PlayerCounter = 0
 			m.gameState.Phase = "吉凶札配布フェイズ"
 			return m, nil
 		}
@@ -182,13 +190,29 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "n":
 				m.gameState.Message = "-> 不採用"
 				m.gameState.GeneralCounter++
+				m.gameState.PlayerCounter++
+
+				// 全員終わったかチェック
+				if m.gameState.PlayerCounter >= len(m.gameState.Order) {
+					m.gameState.PlayerCounter = 0
+					m.gameState.Phase = "吉凶札配布フェイズ"
+				}
 				return m, nil
+
 			case "y":
 				m.gameState.Message = "-> 採用"
-				// 現在の順番のプレイヤーの大名配下に追加する
-				currentPlayerIdx := m.gameState.Order[0]
+				currentPlayerIdx := m.gameState.Order[m.gameState.PlayerCounter]
 				m.gameState.Players[currentPlayerIdx] = append(m.gameState.Players[currentPlayerIdx], m.gameState.GeneralsList[m.gameState.GeneralCounter])
+
+				// 採用でも不採用でも次の武将へ、そして次のプレイヤーへ
 				m.gameState.GeneralCounter++
+				m.gameState.PlayerCounter++
+
+				// 全員終わったかチェック
+				if m.gameState.PlayerCounter >= len(m.gameState.Order) {
+					m.gameState.PlayerCounter = 0
+					m.gameState.Phase = "吉凶札配布フェイズ"
+				}
 				return m, nil
 			}
 		}
@@ -241,8 +265,15 @@ func (m model) View() string {
 	case "武将登用フェイズ":
 		s.WriteString("\n\n")
 		s.WriteString("武将登用フェイズ:\n\n")
-		s.WriteString(fmt.Sprintf("現在のプレイヤー: %s\n", m.gameState.Players[m.gameState.Order[0]][0].Name))
-		s.WriteString(fmt.Sprintf("%s　この武将を採用しますか？(y/n)\n", m.gameState.GeneralsList[m.gameState.GeneralCounter].Name))
+
+		if len(m.gameState.Order) > 0 && m.gameState.PlayerCounter < len(m.gameState.Order) {
+			currentPlayerIdx := m.gameState.Order[m.gameState.PlayerCounter]
+			s.WriteString(fmt.Sprintf("現在のプレイヤー: %s\n", m.gameState.Players[currentPlayerIdx][0].Name))
+		}
+
+		if m.gameState.GeneralCounter < len(m.gameState.GeneralsList) {
+			s.WriteString(fmt.Sprintf("%s　この武将を採用しますか？(y/n)\n", m.gameState.GeneralsList[m.gameState.GeneralCounter].Name))
+		}
 		s.WriteString(m.gameState.Message)
 
 	case "吉凶札配布フェイズ":

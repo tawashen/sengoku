@@ -81,6 +81,7 @@ type GameState struct {
 	Cards          []Card
 	CardCount      int //Card選択用カウンター
 	GeneralCounter int //武将選択用カウンター
+	PlayerCounter  int // 今回追加：現在の順番を管理
 	Message        string
 }
 
