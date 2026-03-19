@@ -83,6 +83,7 @@ type GameState struct {
 	GeneralCounter int //武将選択用カウンター
 	PlayerCounter  int // 今回追加：現在の順番を管理
 	Message        string
+	PhaseStorage   string //メッセージ表示待ちのために前のPhaseを保存する
 }
 
 type Scenario struct {
