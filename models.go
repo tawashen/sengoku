@@ -62,6 +62,7 @@ type Card struct {
 	Description string //説明内容
 	Secret      bool   //秘密
 	Event       bool   //事件
+	Tax         bool   //徴税時に使用
 	Dice        *Dice
 }
 

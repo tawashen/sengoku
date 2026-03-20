@@ -9,6 +9,7 @@ func InitializeCards() []Card {
 			Description: "このカードをひいた大名はこの回に徴税を行う支配地域は自動的に不穏となり、それぞれについて一揆チェックを行う。徴税を行わない支配地域は、不穏とはならない。(このカードは、徴税フェイズに表にする)",
 			Secret:      false,
 			Event:       true,
+			Tax:         true, //徴税時に使用
 		},
 		{
 			Name:        "一向一揆",

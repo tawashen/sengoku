@@ -268,13 +268,36 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
+				m.gameState.Phase = "吉凶札実行フェイズ"
+				m.gameState.PhaseStorage = "吉凶札配布フェイズ"
+				return m, nil
+			}
+			return m, nil
+		}
+
+	case "吉凶札実行フェイズ":
+		if m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].EventC.Dice != nil {
+			m.gameState.Message = fmt.Sprintf("%sは事件札を持っていません", m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].Name)
+			m.gameState.Phase = "メッセージ表示フェイズ"
+			m.gameState.PlayerCounter++
+			return m, nil
+		}
+
+		card := m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].EventC
+
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "enter":
 				m.gameState.Phase = "戦闘フェイズ"
 				return m, nil
 			}
 			return m, nil
 		}
+		return m, nil
 	}
 	return m, nil
+
 }
 
 var (
@@ -366,15 +389,19 @@ func (m model) View() string {
 	case "吉凶札配布フェイズ":
 		s.WriteString("\n\n")
 		s.WriteString("吉凶札配布フェイズ:\n\n")
-		s.WriteString("順番: \n")
-		for i, pIdx := range m.gameState.Order {
-			daimyo := m.gameState.Players[pIdx][0]
-			secretcards := ""
-			for _, card := range daimyo.SecretC {
-				secretcards += card.Name + ", "
-			}
-			s.WriteString(fmt.Sprintf("%d. %s (事件札: %s) (秘密札: %s)\n", i+1, daimyo.Name, daimyo.EventC.Name, secretcards))
+		s.WriteString("Enter　吉凶札実行\n")
+		// for i, pIdx := range m.gameState.Order {
+		// 	daimyo := m.gameState.Players[pIdx][0]
+		// 	secretcards := ""
+		// 	for _, card := range daimyo.SecretC {
+		// 		secretcards += card.Name + ", "
+		// 	}
+		daimyo := m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0]
+		secretcards := ""
+		for _, card := range daimyo.SecretC {
+			secretcards += card.Name + ", "
 		}
+		s.WriteString(fmt.Sprintf("%s (事件札: %s) (秘密札: %s)\n", daimyo.Name, daimyo.EventC.Name, secretcards))
 
 	case "戦闘フェイズ":
 		s.WriteString("\n\n")
