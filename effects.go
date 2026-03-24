@@ -1,13 +1,33 @@
 package main
 
+import "fmt"
+
 // EffectMap はカード名と実際の処理内容を紐付けます。
 // 全てのカード名が含まれていますので、中身を実装してください。
 var EffectMap = map[string]func(m *model, c Card){
 	"国内の不穏": func(m *model, c Card) {
 		// TODO: 徴税フェイズに支配地域を一揆チェック状態にする
+		m.gameState.Phase = "徴税選択フェイズ"
+		m.gameState.PhaseStorage = "徴税フェイズ"
+		m.gameState.Message = "不穏カードの影響により徴税を行えばすべての支配国が不穏状態となります。それでも徴税しますか？(Y/N)"
+
 	},
 	"一向一揆": func(m *model, c Card) {
-		// TODO: ダイスを振り、指定地域に一向一揆を発生させる
+		// ダイスを振り、指定地域に一向一揆を発生させる
+		provinceName := c.Dice.Result[m.gameState.DiceResult-1].(string)
+		
+		if provinceName != "本願寺" {
+			if p, ok := m.gameState.Provinces[provinceName]; ok {
+				p.HasUprising = true
+			}
+		} else {
+			// 本願寺の場合の特別ルール処理があればここに記述
+			// 例：本願寺は特定の処理を行う、または既に不穏状態にするなど
+		}
+		
+		m.gameState.Phase = "メッセージ表示フェイズ"
+		m.gameState.Message = fmt.Sprintf("%sに一向一揆が発生しました", provinceName)
+		m.gameState.PhaseStorage = "吉凶札実行フェイズ"
 	},
 	"廃鉱": func(m *model, c Card) {
 		// TODO: 金山マーカーを除去し、以後の収入を断つ

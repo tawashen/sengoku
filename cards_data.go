@@ -97,12 +97,16 @@ func InitializeCards() []Card {
 			Description: "陸奥、出羽全域に飢饉が発生する。混乱状態となり、徴税できない。隣接する地域毎にサイコロを振り、5か6が出るとその地域にも飢饉が発生する。(このカードは、徴税フェイズに表にする)",
 			Secret:      false,
 			Event:       true,
+			Dice: &Dice{
+				Result: [6]any{1, 2, 3, 4, 5, 6},
+			},
 		},
 		{
 			Name:        "豊作",
 			Description: "サイコロを振り、出た目に対応する地域が豊作となる。(このカードは、徴税フェイズに表にする)",
 			Secret:      false,
 			Event:       true,
+			Tax:         true,
 			Dice: &Dice{
 				Result: [6]any{5, 6, 7, []int{8, 9}, 10, 11},
 			},
@@ -121,12 +125,16 @@ func InitializeCards() []Card {
 			Description: "このカードをひいた大名のすべての支配国で、中立勢力の発生チェックを行う。サイコロを振り 完全支配国 6で発生 部分支配国 5,6で発生。",
 			Secret:      false,
 			Event:       true,
+			Dice: &Dice{
+				Result: [6]any{1, 2, 3, 4, 5, 6},
+			},
 		},
 		{
 			Name:        "凶作",
 			Description: "サイコロを振り、出た目に対応する地域が凶作となる。(このカードは、徴税フェイズに表にする)",
 			Secret:      false,
 			Event:       true,
+			Tax:         true,
 			Dice: &Dice{
 				Result: [6]any{1, 1, 2, 3, 4, 5},
 			},
@@ -136,6 +144,7 @@ func InitializeCards() []Card {
 			Description: "サイコロを振り、出た目に対応する地域が凶作となる。(このカードは、徴税フェイズに表にする)",
 			Secret:      false,
 			Event:       true,
+			Tax:         true,
 			Dice: &Dice{
 				Result: [6]any{6, 7, 8, 9, 10, 11},
 			},
@@ -160,6 +169,9 @@ func InitializeCards() []Card {
 			Description: "九州各地で、中立勢力の発生チェックを行なう。サイコロを振り 完全支配国 6で発生 部分支配国 5,6で発生 非支配国 4,5,6で発生。",
 			Secret:      false,
 			Event:       true,
+			Dice: &Dice{
+				Result: [6]any{1, 2, 3, 4, 5, 6},
+			},
 		},
 		{
 			Name:        "土一揆との和睦",
@@ -178,12 +190,18 @@ func InitializeCards() []Card {
 			Description: "自分の勢力が存在する国に隣接する国に、中立勢力が発生する。（一国のみ）サイコロを一つ振り、大名の威信以下の目が出れば、発生しその中立勢力のうち5戦力を自分の勢力にできる。",
 			Secret:      true,
 			Event:       false,
+			Dice: &Dice{
+				Result: [6]any{1, 2, 3, 4, 5, 6},
+			},
 		},
 		{
 			Name:        "キリシタンの流行",
 			Description: "南蛮貿易マーカーのある国すべてに「キリシタンマーカー」を置く。隣接する国毎にサイコロを振り、5,6が出たら、その国にも「キリシタンマーカー」を置く。",
 			Secret:      true,
 			Event:       false,
+			Dice: &Dice{
+				Result: [6]any{1, 2, 3, 4, 5, 6},
+			},
 		},
 		{
 			Name:        "他の勢力の調整",
@@ -202,6 +220,7 @@ func InitializeCards() []Card {
 			Description: "サイコロを振り、出た目に対応する地域が豊作となる。(このカードは、徴税フェイズに表にする)",
 			Secret:      false,
 			Event:       true,
+			Tax:         true,
 			Dice: &Dice{
 				Result: [6]any{[]int{10, 11}, 1, []int{2, 3}, 4, 5, []int{6, 7}},
 			},
@@ -223,6 +242,9 @@ func InitializeCards() []Card {
 			Description: "他家の武将のうち1人を指名し、暗殺のチェックを行う。依頼額：金10。サイコロを振り、大名暗殺：1, 2で成功、家臣暗殺：1, 2, 3で成功。",
 			Secret:      true,
 			Event:       false,
+			Dice: &Dice{
+				Result: [6]any{1, 2, 3, 4, 5, 6},
+			},
 		},
 		{
 			Name:        "大義",
@@ -235,12 +257,18 @@ func InitializeCards() []Card {
 			Description: "関東全域で、中立勢力の発生チェックを行う。サイコロを振り 完全支配国 6で発生 部分支配国 5,6で発生 非支配国 4,5,6で発生。",
 			Secret:      false,
 			Event:       true,
+			Dice: &Dice{
+				Result: [6]any{1, 2, 3, 4, 5, 6},
+			},
 		},
 		{
 			Name:        "陸奥・出羽での反対勢力の増大",
 			Description: "陸奥・出羽で、中立勢力の発生チェックを行う。サイコロを振り 完全支配国 6で発生 部分支配国 5,6で発生 非支配国 4,5,6で発生。",
 			Secret:      false,
 			Event:       true,
+			Dice: &Dice{
+				Result: [6]any{1, 2, 3, 4, 5, 6},
+			},
 		},
 		{
 			Name:        "敵方家臣の調略",
@@ -274,12 +302,18 @@ func InitializeCards() []Card {
 			Description: "自分の武将がいる国またはその隣国のうち一つを不穏にできる。サイコロを一つ振り、工作を行う武将の威信以下の数が出れば成功する。",
 			Secret:      true,
 			Event:       false,
+			Dice: &Dice{
+				Result: [6]any{1, 2, 3, 4, 5, 6},
+			},
 		},
 		{
 			Name:        "家臣死亡",
 			Description: "サイコロを一つ振り、どの家臣が死亡するかを決定する。",
 			Secret:      true,
 			Event:       false,
+			Dice: &Dice{
+				Result: [6]any{1, 2, 3, 4, 5, 6},
+			},
 		},
 		{
 			Name:        "密報",

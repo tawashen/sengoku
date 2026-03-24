@@ -138,7 +138,7 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -166,6 +166,28 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	switch m.gameState.Phase {
+	case "徴税選択フェイズ":
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "y":
+				m.gameState.Phase = "メッセージ表示フェイズ"
+				m.gameState.Message = "徴税を行います"
+				for _, p := range m.gameState.Players[m.gameState.PlayerCounter][m.gameState.GeneralCounter].Provinces {
+					p.Restless = true
+				}
+				m.gameState.Players[m.gameState.PlayerCounter][m.gameState.GeneralCounter].EventC = Card{}
+				return m, nil
+			case "n":
+				m.gameState.Phase = "メッセージ表示フェイズ"
+				m.gameState.Message = "徴税を行いません"
+				m.gameState.Players[m.gameState.PlayerCounter][m.gameState.GeneralCounter].EventC = Card{}
+				m.gameState.PlayerCounter++
+				return m, nil
+			}
+			return m, nil
+		}
+
 	case "順番決定フェイズ":
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
@@ -276,20 +298,44 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case "吉凶札実行フェイズ":
-		if m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].EventC.Dice != nil {
-			m.gameState.Message = fmt.Sprintf("%sは事件札を持っていません", m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].Name)
-			m.gameState.Phase = "メッセージ表示フェイズ"
-			m.gameState.PlayerCounter++
-			return m, nil
-		}
-
-		card := m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].EventC
 
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
-				m.gameState.Phase = "戦闘フェイズ"
+
+				//吉凶札を持っていない場合
+				if m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].EventC == (Card{}) {
+					m.gameState.Message = fmt.Sprintf("%sは事件札を持っていません", m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].Name)
+					m.gameState.Phase = "メッセージ表示フェイズ"
+					m.gameState.PhaseStorage = "吉凶札実行フェイズ"
+				} else {
+					card := m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].EventC
+					//吉凶札が徴税札の場合
+					if card.Tax {
+						m.gameState.Message = fmt.Sprintf("%sは徴税フェイズで使います", card.Name)
+						m.gameState.Phase = "メッセージ表示フェイズ"
+						m.gameState.PhaseStorage = "吉凶札実行フェイズ"
+					} else {
+						//サイコロを振る
+						if card.Dice != nil {
+							m.gameState.DiceResult = rand.IntN(6) + 1
+						}
+						//カード実行（自動的に Phase = "メッセージ表示フェイズ", PhaseStorage = "吉凶札実行フェイズ" がセットされる想定）
+						m.ExecuteCard(card)
+					}
+				}
+
+				// 処理が終わったら次のプレイヤーへ
+				m.gameState.PlayerCounter++
+
+				// もし今終わったのが「最後のプレイヤー」だった場合、
+				// メッセージ表示後に戻る先(PhaseStorage)を "調略フェイズ" に変更する！
+				if m.gameState.PlayerCounter >= len(m.gameState.Order) {
+					m.gameState.PhaseStorage = "調略フェイズ"
+					m.gameState.PlayerCounter = 0
+				}
+
 				return m, nil
 			}
 			return m, nil
@@ -325,14 +371,31 @@ func (m model) View() string {
 	s.WriteString("\n\n")
 
 	switch m.gameState.Phase {
+
+	case "吉凶札実行フェイズ":
+		s.WriteString("\n\n")
+		//s.WriteString("吉凶札実行フェイズ:\n\n")
+		s.WriteString(m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].Name)
+		s.WriteString("のターンです Please Enter\n")
+		s.WriteString(m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].EventC.Name)
+		s.WriteString("\n\n")
+		s.WriteString(m.gameState.Message)
+		s.WriteString("\n\n")
+
+	case "徴税選択フェイズ":
+		s.WriteString("\n\n")
+		//s.WriteString("徴税選択フェイズ:\n\n")
+		s.WriteString(m.gameState.Message)
+		s.WriteString("\n\n")
+
 	case "順番決定フェイズ":
 		s.WriteString("\n\n")
-		s.WriteString("順番決定フェイズ:\n\n")
+		//s.WriteString("順番決定フェイズ:\n\n")
 		s.WriteString("(enter: 次のフェイズへ, c: 国のつながり確認)\n")
 
 	case "ステータス表示フェイズ":
 		s.WriteString("\n\n")
-		s.WriteString("ステータス表示フェイズ:\n\n")
+		//s.WriteString("ステータス表示フェイズ:\n\n")
 		s.WriteString("(enter: 元のフェイズへ)\n")
 
 		counter := m.gameState.PlayerCounter
@@ -368,7 +431,7 @@ func (m model) View() string {
 
 	case "メッセージ表示フェイズ":
 		s.WriteString("\n\n")
-		s.WriteString("メッセージ表示フェイズ:\n\n")
+		//s.WriteString("メッセージ表示フェイズ:\n\n")
 		s.WriteString("(enter: 元のフェイズへ)\n")
 		s.WriteString(m.gameState.Message)
 
@@ -388,7 +451,7 @@ func (m model) View() string {
 
 	case "吉凶札配布フェイズ":
 		s.WriteString("\n\n")
-		s.WriteString("吉凶札配布フェイズ:\n\n")
+		//s.WriteString("吉凶札配布フェイズ:\n\n")
 		s.WriteString("Enter　吉凶札実行\n")
 		// for i, pIdx := range m.gameState.Order {
 		// 	daimyo := m.gameState.Players[pIdx][0]
@@ -449,12 +512,11 @@ func (m model) View() string {
 }
 
 func main() {
-
-	p := tea.NewProgram(initialModel())
+	m := initialModel()
+	p := tea.NewProgram(&m)
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Error running program: %v", err)
 	}
-
 }
 
 func MyShuffleInt(list []int) []int {

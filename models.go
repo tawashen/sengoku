@@ -85,6 +85,7 @@ type GameState struct {
 	PlayerCounter  int // 今回追加：現在の順番を管理
 	Message        string
 	PhaseStorage   string //メッセージ表示待ちのために前のPhaseを保存する
+	DiceResult     int    //サイコロの結果
 }
 
 type Scenario struct {
