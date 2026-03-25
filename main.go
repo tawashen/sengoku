@@ -122,10 +122,10 @@ func initialModel() model {
 	kenshin.EventC = Card{}
 	kenshin.SecretC = []Card{}
 
-	gs.Players = [][]*General{
-		{nobunaga},
-		{shingen},
-		{kenshin},
+	gs.Players = []*General{
+		nobunaga,
+		shingen,
+		kenshin,
 	}
 
 	return model{
@@ -173,15 +173,15 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "y":
 				m.gameState.Phase = "メッセージ表示フェイズ"
 				m.gameState.Message = "徴税を行います"
-				for _, p := range m.gameState.Players[m.gameState.PlayerCounter][m.gameState.GeneralCounter].Provinces {
+				for _, p := range m.gameState.Players[m.gameState.PlayerCounter].Provinces {
 					p.Restless = true
 				}
-				m.gameState.Players[m.gameState.PlayerCounter][m.gameState.GeneralCounter].EventC = Card{}
+				m.gameState.Players[m.gameState.PlayerCounter].EventC = Card{}
 				return m, nil
 			case "n":
 				m.gameState.Phase = "メッセージ表示フェイズ"
 				m.gameState.Message = "徴税を行いません"
-				m.gameState.Players[m.gameState.PlayerCounter][m.gameState.GeneralCounter].EventC = Card{}
+				m.gameState.Players[m.gameState.PlayerCounter].EventC = Card{}
 				m.gameState.PlayerCounter++
 				return m, nil
 			}
@@ -266,7 +266,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "y":
 				m.gameState.Message = fmt.Sprintf("%sは採用となりました", m.gameState.GeneralsList[m.gameState.GeneralCounter].Name)
 				currentPlayerIdx := m.gameState.Order[m.gameState.PlayerCounter]
-				m.gameState.Players[currentPlayerIdx] = append(m.gameState.Players[currentPlayerIdx], m.gameState.GeneralsList[m.gameState.GeneralCounter])
+				// 配下に加える
+				daimyo := m.gameState.Players[currentPlayerIdx]
+				daimyo.Vassals = append(daimyo.Vassals, m.gameState.GeneralsList[m.gameState.GeneralCounter])
 
 				// 採用でも不採用でも次の武将へ、そして次のプレイヤーへ
 				m.gameState.GeneralCounter++
@@ -305,12 +307,12 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 
 				//吉凶札を持っていない場合
-				if m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].EventC == (Card{}) {
-					m.gameState.Message = fmt.Sprintf("%sは事件札を持っていません", m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].Name)
+				if m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].EventC == (Card{}) {
+					m.gameState.Message = fmt.Sprintf("%sは事件札を持っていません", m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].Name)
 					m.gameState.Phase = "メッセージ表示フェイズ"
 					m.gameState.PhaseStorage = "吉凶札実行フェイズ"
 				} else {
-					card := m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].EventC
+					card := m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].EventC
 					//吉凶札が徴税札の場合
 					if card.Tax {
 						m.gameState.Message = fmt.Sprintf("%sは徴税フェイズで使います", card.Name)
@@ -375,9 +377,9 @@ func (m model) View() string {
 	case "吉凶札実行フェイズ":
 		s.WriteString("\n\n")
 		//s.WriteString("吉凶札実行フェイズ:\n\n")
-		s.WriteString(m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].Name)
+		s.WriteString(m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].Name)
 		s.WriteString("のターンです Please Enter\n")
-		s.WriteString(m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0].EventC.Name)
+		s.WriteString(m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].EventC.Name)
 		s.WriteString("\n\n")
 		s.WriteString(m.gameState.Message)
 		s.WriteString("\n\n")
@@ -402,7 +404,7 @@ func (m model) View() string {
 		if counter >= len(m.gameState.Order) {
 			counter = 0
 		}
-		p := m.gameState.Players[m.gameState.Order[counter]][0]
+		p := m.gameState.Players[m.gameState.Order[counter]]
 
 		provinces := ""
 		for _, province := range p.Provinces {
@@ -441,7 +443,7 @@ func (m model) View() string {
 
 		if len(m.gameState.Order) > 0 && m.gameState.PlayerCounter < len(m.gameState.Order) {
 			currentPlayerIdx := m.gameState.Order[m.gameState.PlayerCounter]
-			s.WriteString(fmt.Sprintf("現在のプレイヤー: %s\n", m.gameState.Players[currentPlayerIdx][0].Name))
+			s.WriteString(fmt.Sprintf("現在のプレイヤー: %s\n", m.gameState.Players[currentPlayerIdx].Name))
 		}
 
 		if m.gameState.GeneralCounter < len(m.gameState.GeneralsList) {
@@ -459,7 +461,7 @@ func (m model) View() string {
 		// 	for _, card := range daimyo.SecretC {
 		// 		secretcards += card.Name + ", "
 		// 	}
-		daimyo := m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]][0]
+		daimyo := m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]]
 		secretcards := ""
 		for _, card := range daimyo.SecretC {
 			secretcards += card.Name + ", "
@@ -540,8 +542,7 @@ func (m *model) ExecuteCard(c Card) {
 }
 
 func (m *model) DistributeCards() {
-	for _, group := range m.gameState.Players {
-		daimyo := group[0] // 大名に配る
+	for _, daimyo := range m.gameState.Players {
 		index := m.gameState.CardCount
 		if m.gameState.Cards[index].Event {
 			daimyo.EventC = m.gameState.Cards[index]

@@ -50,9 +50,9 @@ type GameState struct {
 	Phase          string
 	Provinces      map[string]*Province
 	Generals       map[string]*General
-	GeneralsList   []*General   //武将リスト
-	Players        [][]*General // 各プレイヤーごとの武将リスト（[0]がそのプレイヤーの大名）
-	Order          []int        // 大名のIndex用
+	GeneralsList   []*General //武将リスト
+	Players        []*General // 各プレイヤーの大名
+	Order          []int      // 大名のIndex用
 	Cards          []Card
 	CardCount      int //Card選択用カウンター
 	GeneralCounter int //武将選択用カウンター
@@ -93,7 +93,7 @@ type Scenario struct {
 	Member    int
 	Provinces map[string]*Province //そのままGSにコピー
 	Generals  map[string]*General  //そのままGSにコピー
-	Players   [][]*General         //そのままGSにコピー
+	Players   []*General           //そのままGSにコピー
 }
 
 // Helper: Check if two provinces are neighbors

@@ -25,19 +25,41 @@ var EffectMap = map[string]func(m *model, c Card){
 	},
 	"廃鉱": func(m *model, c Card) {
 		// TODO: 金山マーカーを除去し、以後の収入を断つ
-		player := m.gameState.Players[m.gameState.PlayerCounter][0]
+		provinces := ""
+		player := m.gameState.Players[m.gameState.PlayerCounter]
 		for _, p := range player.Provinces {
 			if p.GoldMine {
 				p.GoldMine = false
+				provinces += p.Name + ", "
 			}
 		}
 		m.gameState.Phase = "メッセージ表示フェイズ"
-		m.gameState.Message = "領国の金山が廃鉱となりました"
+		m.gameState.Message = fmt.Sprintf("%sの金山が廃鉱となりました", provinces)
 		m.gameState.PhaseStorage = "吉凶札実行フェイズ"
 	},
 	"裏切り": func(m *model, c Card) {
 		// TODO: 俸禄最小の家臣を特定し、離脱させる
-		player := m.gameState.Players[m.gameState.PlayerCounter][m.gameState.GeneralCounter]
+		player := m.gameState.Players[m.gameState.PlayerCounter]
+		minStipend := 10000
+		minIndex := -1
+		for i, v := range player.Vassals {
+			if v.Stipend < minStipend {
+				minStipend = v.Stipend
+				minIndex = i
+			}
+		}
+
+		if minIndex != -1 {
+			m.gameState.Phase = "メッセージ表示フェイズ"
+			m.gameState.Message = fmt.Sprintf("家臣である%sが裏切りました", player.Vassals[minIndex].Name)
+			m.gameState.PhaseStorage = "吉凶札実行フェイズ"
+
+			player.Vassals = append(player.Vassals[:minIndex], player.Vassals[minIndex+1:]...)
+		} else {
+			m.gameState.Phase = "メッセージ表示フェイズ"
+			m.gameState.Message = "家臣がいません"
+			m.gameState.PhaseStorage = "吉凶札実行フェイズ"
+		}
 
 	},
 	"大名死亡": func(m *model, c Card) {
