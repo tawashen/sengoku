@@ -14,26 +14,31 @@ var EffectMap = map[string]func(m *model, c Card){
 	},
 	"一向一揆": func(m *model, c Card) {
 		// ダイスを振り、指定地域に一向一揆を発生させる
+		//ここで発生した一向一揆は隣接する国に波及する可能性がある、一向一揆波及フェイズを新たに作る
 		provinceName := c.Dice.Result[m.gameState.DiceResult-1].(string)
-		
-		if provinceName != "本願寺" {
-			if p, ok := m.gameState.Provinces[provinceName]; ok {
-				p.HasUprising = true
-			}
-		} else {
-			// 本願寺の場合の特別ルール処理があればここに記述
-			// 例：本願寺は特定の処理を行う、または既に不穏状態にするなど
+		if p, ok := m.gameState.Provinces[provinceName]; ok {
+			p.HasUprising = true
 		}
-		
 		m.gameState.Phase = "メッセージ表示フェイズ"
 		m.gameState.Message = fmt.Sprintf("%sに一向一揆が発生しました", provinceName)
 		m.gameState.PhaseStorage = "吉凶札実行フェイズ"
 	},
 	"廃鉱": func(m *model, c Card) {
 		// TODO: 金山マーカーを除去し、以後の収入を断つ
+		player := m.gameState.Players[m.gameState.PlayerCounter][0]
+		for _, p := range player.Provinces {
+			if p.GoldMine {
+				p.GoldMine = false
+			}
+		}
+		m.gameState.Phase = "メッセージ表示フェイズ"
+		m.gameState.Message = "領国の金山が廃鉱となりました"
+		m.gameState.PhaseStorage = "吉凶札実行フェイズ"
 	},
 	"裏切り": func(m *model, c Card) {
 		// TODO: 俸禄最小の家臣を特定し、離脱させる
+		player := m.gameState.Players[m.gameState.PlayerCounter][m.gameState.GeneralCounter]
+
 	},
 	"大名死亡": func(m *model, c Card) {
 		// TODO: 継承処理と全家臣の忠誠チェック

@@ -31,32 +31,6 @@ type Castle struct {
 	Surrounded bool //包囲中
 }
 
-// General represents a Sengoku Daimyo or vassal
-type General struct {
-	ID           string
-	Name         string
-	Combat       int    // 戦闘能力
-	PlusCombat   int    // 戦闘能力補正値
-	Politics     int    // 内政能力
-	Prestige     int    // 威信
-	PlusPrestige int    // 威信補正
-	Loyalty      int    // 忠誠度
-	PlusLoyalty  int    // 忠誠度補正
-	Stipend      int    // 俸禄
-	ProvinceID   string // 所在国ID
-	OwnerID      string // 所属プレイヤーID
-
-	// 大名（プレイヤー）としての拡張フィールド
-	Gold      int
-	Clan      string
-	IsAI      bool
-	Vassals   []*General  // 配下の武将
-	Provinces []*Province // 領地
-	Power     int         // 国力の合計
-	EventC    Card        // 事件札
-	SecretC   []Card      // 秘密札
-}
-
 type Card struct {
 	Name        string //キーはこれを使う
 	Description string //説明内容
@@ -86,6 +60,32 @@ type GameState struct {
 	Message        string
 	PhaseStorage   string //メッセージ表示待ちのために前のPhaseを保存する
 	DiceResult     int    //サイコロの結果
+}
+
+// General represents a Sengoku Daimyo or vassal
+type General struct {
+	ID           string
+	Name         string
+	Combat       int    // 戦闘能力
+	PlusCombat   int    // 戦闘能力補正値
+	Politics     int    // 内政能力
+	Prestige     int    // 威信
+	PlusPrestige int    // 威信補正
+	Loyalty      int    // 忠誠度
+	PlusLoyalty  int    // 忠誠度補正
+	Stipend      int    // 俸禄
+	ProvinceID   string // 所在国ID
+	OwnerID      string // 所属プレイヤーID
+
+	// 大名（プレイヤー）としての拡張フィールド
+	Gold      int
+	Clan      string
+	IsAI      bool
+	Vassals   []*General  // 配下の武将
+	Provinces []*Province // 領地
+	Power     int         // 国力の合計
+	EventC    Card        // 事件札
+	SecretC   []Card      // 秘密札
 }
 
 type Scenario struct {
