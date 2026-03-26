@@ -64,9 +64,19 @@ var EffectMap = map[string]func(m *model, c Card){
 	},
 	"大名死亡": func(m *model, c Card) {
 		// TODO: 継承処理と全家臣の忠誠チェック
+		player := m.gameState.Players[m.gameState.PlayerCounter]
+
+		if len(player.Vassals) == 0 {
+			m.gameState.Phase = "メッセージ表示フェイズ"
+			m.gameState.Players[m.gameState.PlayerCounter] = m.gameState.GeneralsList[m.gameState.GeneralCounter]
+			m.gameState.GeneralCounter++
+			m.gameState.Message = fmt.Sprintf("家臣がいません　%sは滅亡しました。次期当主は%sです。", player.Name, m.gameState.Players[m.gameState.PlayerCounter].Name)
+			m.gameState.PhaseStorage = "吉凶札実行フェイズ"
+		}
 	},
 	"内応の露顕": func(m *model, c Card) {
 		// TODO: 「城方の内応」を無効化し、強襲を強制する
+
 	},
 	"城方の内応": func(m *model, c Card) {
 		// TODO: 城塞の除去、またはダイスによる戦力低下
@@ -82,6 +92,23 @@ var EffectMap = map[string]func(m *model, c Card){
 	},
 	"飢饉": func(m *model, c Card) {
 		// TODO: 陸奥・出羽の混乱状態化と近隣への波及チェック
+		//一向一揆と一緒で感染用フェイズを用意する必要あり
+		for _, p := range m.gameState.Provinces {
+			p.StarvingChecked = false
+		}
+		//飢饉チェック
+		m.gameState.Provinces["陸奥(北)"].Starving = true
+		m.gameState.Provinces["陸奥(北)"].StarvingChecked = true
+		m.gameState.Provinces["陸奥(中)"].Starving = true
+		m.gameState.Provinces["陸奥(中)"].StarvingChecked = true
+		m.gameState.Provinces["陸奥(南)"].Starving = true
+		m.gameState.Provinces["陸奥(南)"].StarvingChecked = true
+		m.gameState.Provinces["出羽"].Starving = true
+		m.gameState.Provinces["出羽"].StarvingChecked = true
+
+		m.gameState.Phase = "メッセージ表示フェイズ"
+		m.gameState.Message = "飢饉が発生しました"
+		m.gameState.PhaseStorage = "飢饉感染チェックフェイズ"
 	},
 	"豊作": func(m *model, c Card) {
 		// TODO: ダイスで指定された地域を豊作状態にする

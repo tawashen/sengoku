@@ -29,14 +29,14 @@ func InitializeCards() []Card {
 		{
 			Name:        "裏切り",
 			Description: "現在の俸禄が最も少ない家臣が裏切る。",
-			Secret:      true,
-			Event:       false,
+			Secret:      false,
+			Event:       true,
 		},
 		{
 			Name:        "大名死亡",
 			Description: "新当主（世継ぎ）をたてた後、全家臣について裏切りチェックを行う。",
-			Secret:      true,
-			Event:       false,
+			Secret:      false,
+			Event:       true,
 		},
 		{
 			Name:        "内応の露顕",
@@ -45,13 +45,13 @@ func InitializeCards() []Card {
 			Event:       false,
 		},
 		{
-			Name:        "城方の内応",
+			Name:        "城方の内応Auto",
 			Description: "攻城戦の際にこのカードを出すと、目標の城塞を取り除ける。",
 			Secret:      true,
 			Event:       false,
 		},
 		{
-			Name:        "城方の内応",
+			Name:        "城方の内応Dice",
 			Description: "サイコロを一つ振り、下の表にしたがって、相手の城のレベル数を低下させることができる。",
 			Secret:      true,
 			Event:       false,
@@ -60,7 +60,7 @@ func InitializeCards() []Card {
 			},
 		},
 		{
-			Name:        "城方の内応",
+			Name:        "城方の内応Dice",
 			Description: "サイコロを一つ振り、下の表にしたがって、相手の城のレベル数を低下させることができる。",
 			Secret:      true,
 			Event:       false,
@@ -97,6 +97,7 @@ func InitializeCards() []Card {
 			Description: "陸奥、出羽全域に飢饉が発生する。混乱状態となり、徴税できない。隣接する地域毎にサイコロを振り、5か6が出るとその地域にも飢饉が発生する。(このカードは、徴税フェイズに表にする)",
 			Secret:      false,
 			Event:       true,
+			Tax:         true,
 			Dice: &Dice{
 				Result: [6]any{1, 2, 3, 4, 5, 6},
 			},
