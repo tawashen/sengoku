@@ -77,6 +77,7 @@ type General struct {
 	Stipend      int    // 俸禄
 	ProvinceID   string // 所在国ID
 	OwnerID      string // 所属プレイヤーID
+	Defected     bool   // 離反したか
 
 	// 大名（プレイヤー）としての拡張フィールド
 	Gold      int

@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand/v2"
+)
 
 // EffectMap はカード名と実際の処理内容を紐付けます。
 // 全てのカード名が含まれていますので、中身を実装してください。
@@ -70,7 +73,43 @@ var EffectMap = map[string]func(m *model, c Card){
 			m.gameState.Phase = "メッセージ表示フェイズ"
 			m.gameState.Players[m.gameState.PlayerCounter] = m.gameState.GeneralsList[m.gameState.GeneralCounter]
 			m.gameState.GeneralCounter++
-			m.gameState.Message = fmt.Sprintf("家臣がいません　%sは滅亡しました。次期当主は%sです。", player.Name, m.gameState.Players[m.gameState.PlayerCounter].Name)
+			m.gameState.Message = fmt.Sprintf("家臣がいません。%sは滅亡しました。新たな大名として%sが立ち上がります。", player.Name, m.gameState.Players[m.gameState.PlayerCounter].Name)
+			m.gameState.PhaseStorage = "吉凶札実行フェイズ"
+		} else {
+			// 忠誠度チェック
+			// 裏切り者スライス
+			defectedVassals := []*General{}
+			for _, v := range player.Vassals {
+				if v.Loyalty+v.Stipend+player.Prestige < rand.IntN(6)+1 {
+					v.Defected = true
+					defectedVassals = append(defectedVassals, v)
+				}
+			}
+
+			// 離反武将打ち取りチェック
+			// 離反した武将と同じ領国に居る離反してない武将のうちで戦闘力が最強の武将を選ぶ
+			slayedVassals := []*General{} // 討ち取られた裏切り者
+			for _, dv := range defectedVassals {
+				var vassalSlayer *General = nil // 打ち取る役目の武将
+
+				for _, v := range player.Vassals {
+					// 離反しておらず、裏切り者と同じ国に居る武将を探す
+					if !v.Defected && dv.ProvinceID == v.ProvinceID {
+						if vassalSlayer == nil || v.Combat > vassalSlayer.Combat {
+							vassalSlayer = v // 最強の武将を更新
+						}
+					}
+				}
+
+				// 討ち取る武将が存在し、かつ裏切り者よりも戦闘力が上の場合
+				if vassalSlayer != nil && vassalSlayer.Combat > dv.Combat {
+					slayedVassals = append(slayedVassals, dv)
+				}
+			}
+
+			// TODO: 後継者の決定、離反成功者の除外、討ち取られた者の処理など
+			m.gameState.Phase = "メッセージ表示フェイズ"
+			m.gameState.Message = fmt.Sprintf("%sが死去しました...！後継者を選びます。\n（離反者: %d人 / うち討ち取られた者: %d人）", player.Name, len(defectedVassals), len(slayedVassals))
 			m.gameState.PhaseStorage = "吉凶札実行フェイズ"
 		}
 	},
