@@ -36,12 +36,73 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch m.gameState.Phase {
 
+	case "徴税フェイズ":
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "enter":
+				//現在のプレイヤーのイベントカードが「飢饉」なら飢饉感染チェックフェイズへ
+				if m.gameState.Players[m.gameState.PlayerCounter].EventC.Name == "飢饉" {
+					m.gameState.Phase = "メッセージ表示フェイズ"
+					m.gameState.Message = "飢饉カード！飢饉が発生しました。隣接国に感染する可能性があります\n"
+					m.gameState.PhaseStorage = "飢饉感染チェックフェイズ"
+					return m, nil
+				}
+
+				//現在のプレイヤーのカードのが「国内の不穏」なら徴税選択フェイズへ
+				if m.gameState.Players[m.gameState.PlayerCounter].EventC.Name == "国内の不穏" {
+					m.gameState.Phase = "メッセージ表示フェイズ"
+					m.gameState.Message = "国内の不穏カード！徴税を行えばすべての支配国が不穏状態となります。それでも徴税しますか？(Y/N)\n"
+					m.gameState.PhaseStorage = "徴税選択フェイズ"
+					return m, nil
+				}
+			}
+			return m, nil
+		}
 	case "飢饉感染チェックフェイズ":
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
-				m.gameState.Phase = "徴税選択フェイズ"
+
+				//飢饉発生国スライス作成
+				starvingProvinces := []*Province{}
+				for _, p := range m.gameState.Provinces {
+					if p.Starving {
+						starvingProvinces = append(starvingProvinces, p)
+					}
+				}
+
+				//新規感染国リスト
+				newlyInfectedProvinces := ""
+
+				//飢饉発生国の隣接国をリストアップして飢饉チェック
+				for _, sp := range starvingProvinces {
+					for _, p := range sp.Neighbors {
+						if !m.gameState.Provinces[p].StarvingChecked {
+							if rand.IntN(6)+1 > 4 {
+								newlyInfectedProvinces += m.gameState.Provinces[p].Name + ","
+								m.gameState.Provinces[p].Starving = true
+								m.gameState.Provinces[p].StarvingChecked = true
+							} else {
+								m.gameState.Provinces[p].StarvingChecked = true
+							}
+						}
+					}
+				}
+				//新規感染国がなければ終了
+				if newlyInfectedProvinces == "" {
+					m.gameState.Phase = "メッセージ表示フェイズ"
+					m.gameState.Message = "飢饉は感染しませんでした"
+					m.gameState.PhaseStorage = "徴税フェイズ"
+					//現在のプレイヤーのイベントカードを消去
+					m.gameState.Players[m.gameState.PlayerCounter].EventC = Card{}
+					return m, nil
+				}
+				//新規感染国があれば
+				m.gameState.Phase = "メッセージ表示フェイズ"
+				m.gameState.Message = "飢饉が" + newlyInfectedProvinces + "に感染しました"
+				m.gameState.PhaseStorage = "飢饉感染チェックフェイズ"
 				return m, nil
 			}
 			return m, nil

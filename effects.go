@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand/v2"
+	"sort"
 )
 
 // EffectMap はカード名と実際の処理内容を紐付けます。
@@ -88,7 +89,8 @@ var EffectMap = map[string]func(m *model, c Card){
 
 			// 離反武将打ち取りチェック
 			// 離反した武将と同じ領国に居る離反してない武将のうちで戦闘力が最強の武将を選ぶ
-			slayedVassals := []*General{} // 討ち取られた裏切り者
+			slayedVassals := []*General{}    // 討ち取られた裏切り者
+			succeededVassals := []*General{} // 離反成功者のリストアップ
 			for _, dv := range defectedVassals {
 				var vassalSlayer *General = nil // 打ち取る役目の武将
 
@@ -105,11 +107,66 @@ var EffectMap = map[string]func(m *model, c Card){
 				if vassalSlayer != nil && vassalSlayer.Combat > dv.Combat {
 					slayedVassals = append(slayedVassals, dv)
 				}
+				// 離反成功者のリストアップ
+				if vassalSlayer == nil || vassalSlayer.Combat <= dv.Combat {
+					succeededVassals = append(succeededVassals, dv)
+				}
 			}
+
+			//離反成功者の処理
+			//武将の居ない領国リストアップ
+			noVassalProvinces := []*Province{}
+			for _, p := range player.Provinces {
+				if len(p.Generals) == 0 {
+					noVassalProvinces = append(noVassalProvinces, p)
+				}
+			}
+
+			//武将の居ない領国を国力順にソート
+			sort.Slice(noVassalProvinces, func(i, j int) bool {
+				return noVassalProvinces[i].Kokuryoku > noVassalProvinces[j].Kokuryoku
+			})
+
+			//武将の居ない領国に離反成功者を配置
+			dokurituMsg := ""
+			for i, v := range succeededVassals {
+				if i < len(noVassalProvinces) {
+					noVassalProvinces[i].OwnerID = v.ID
+					v.ProvinceID = noVassalProvinces[i].ID
+					v.OwnerID = player.ID
+					v.Stipend = player.Stipend
+					v.Loyalty = player.Loyalty
+					v.PlusLoyalty = player.PlusLoyalty
+					v.PlusPrestige = player.PlusPrestige
+					v.PlusCombat = player.PlusCombat
+					v.Prestige = player.Prestige
+					v.Combat = player.Combat
+					v.Politics = player.Politics
+					v.Defected = false
+					v.Vassals = []*General{}
+					v.Provinces = []*Province{}
+					v.Power = 0
+					v.EventC = Card{}
+					v.SecretC = []Card{}
+					dokurituMsg += v.Name + "が" + noVassalProvinces[i].Name + "を領国として独立しました\n"
+				} else {
+					break
+				}
+			}
+			//一端部下を全部消して
+			//裏切って無い者のみ追加する
+			newVassals := []*General{}
+			for _, v := range player.Vassals {
+				if !v.Defected {
+					newVassals = append(newVassals, v)
+				}
+			}
+			player.Vassals = newVassals
 
 			// TODO: 後継者の決定、離反成功者の除外、討ち取られた者の処理など
 			m.gameState.Phase = "メッセージ表示フェイズ"
 			m.gameState.Message = fmt.Sprintf("%sが死去しました...！後継者を選びます。\n（離反者: %d人 / うち討ち取られた者: %d人）", player.Name, len(defectedVassals), len(slayedVassals))
+			m.gameState.Message += dokurituMsg
 			m.gameState.PhaseStorage = "吉凶札実行フェイズ"
 		}
 	},

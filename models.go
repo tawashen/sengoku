@@ -6,7 +6,8 @@ type Province struct {
 	Name            string
 	Kokuryoku       int    // 国力
 	OwnerID         string // 所属プレイヤーID
-	Complete        bool   //完全支配かどうか
+	Generals        []*General
+	Complete        bool //完全支配かどうか
 	Castles         []*Castle
 	Soldiers        int  // 兵士数
 	Restless        bool // 不穏状態
