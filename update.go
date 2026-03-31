@@ -36,26 +36,42 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch m.gameState.Phase {
 
+	case "調略フェイズ":
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "enter":
+
+				return m, nil
+			}
+		}
+
 	case "徴税フェイズ":
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
-				//現在のプレイヤーのイベントカードが「飢饉」なら飢饉感染チェックフェイズへ
-				if m.gameState.Players[m.gameState.PlayerCounter].EventC.Name == "飢饉" {
-					m.gameState.Phase = "メッセージ表示フェイズ"
-					m.gameState.Message = "飢饉カード！飢饉が発生しました。隣接国に感染する可能性があります\n"
-					m.gameState.PhaseStorage = "飢饉感染チェックフェイズ"
+
+				if m.gameState.Players[m.gameState.PlayerCounter].EventC.Tax {
+					m.ExecuteCard(m.gameState.Players[m.gameState.PlayerCounter].EventC)
 					return m, nil
 				}
 
-				//現在のプレイヤーのカードのが「国内の不穏」なら徴税選択フェイズへ
-				if m.gameState.Players[m.gameState.PlayerCounter].EventC.Name == "国内の不穏" {
-					m.gameState.Phase = "メッセージ表示フェイズ"
-					m.gameState.Message = "国内の不穏カード！徴税を行えばすべての支配国が不穏状態となります。それでも徴税しますか？(Y/N)\n"
-					m.gameState.PhaseStorage = "徴税選択フェイズ"
-					return m, nil
-				}
+				// //現在のプレイヤーのイベントカードが「飢饉」なら飢饉感染チェックフェイズへ
+				// if m.gameState.Players[m.gameState.PlayerCounter].EventC.Name == "飢饉" {
+				// 	m.gameState.Phase = "メッセージ表示フェイズ"
+				// 	m.gameState.Message = "飢饉カード！飢饉が発生しました。隣接国に感染する可能性があります\n"
+				// 	m.gameState.PhaseStorage = "飢饉感染チェックフェイズ"
+				// 	return m, nil
+				// }
+
+				// //現在のプレイヤーのカードのが「国内の不穏」なら徴税選択フェイズへ
+				// if m.gameState.Players[m.gameState.PlayerCounter].EventC.Name == "国内の不穏" {
+				// 	m.gameState.Phase = "メッセージ表示フェイズ"
+				// 	m.gameState.Message = "国内の不穏カード！徴税を行えばすべての支配国が不穏状態となります。それでも徴税しますか？(Y/N)\n"
+				// 	m.gameState.PhaseStorage = "徴税選択フェイズ"
+				// 	return m, nil
+				// }
 			}
 			return m, nil
 		}
