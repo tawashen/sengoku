@@ -36,12 +36,45 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch m.gameState.Phase {
 
+	case "調略結果判定フェイズ":
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "enter": //結果を表示してるだけなので次のフェイズへ
+				m.gameState.Phase = "徴税フェイズ"
+				m.gameState.PlayerCounter = 0
+				return m, nil
+			}
+		}
 	case "調略フェイズ":
+		player := m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]] //現在のプレイヤー
+		currentProvince := player.Provinces[m.cursor]                               //カーソルのある領国
+		currentCounter := m.gameState.PlayerCounter                                 //現在のプレイヤーのカウンター
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter":
-
+				//資金バラマキ終了、次のプレイヤーへ
+				m.gameState.PlayerCounter++
+				//最後のプレイヤーだった場合には次のフェイズへ
+				if m.gameState.PlayerCounter >= len(m.gameState.Players) {
+					m.gameState.PlayerCounter = 0
+					m.gameState.Phase = "調略結果判定フェイズ"
+				}
+				//カーソルの領国に資金を割り振り、数値入力
+			case "right":
+				if player.Gold == 0 {
+					return m, nil
+				}
+				player.Gold--
+				currentProvince.Bids[currentCounter]++
+				return m, nil
+			case "left":
+				if currentProvince.Bids[currentCounter] == 0 {
+					return m, nil
+				}
+				player.Gold++
+				currentProvince.Bids[currentCounter]--
 				return m, nil
 			}
 		}

@@ -21,6 +21,7 @@ type Province struct {
 	Honganji        bool     //本願寺
 	Region          int      //地域
 	Neighbors       []string // 隣接する国のID (つながり)
+	Bids            []int    //調略賭け金
 }
 
 type Castle struct {

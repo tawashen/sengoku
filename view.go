@@ -16,6 +16,38 @@ func (m model) View() string {
 
 	switch m.gameState.Phase {
 
+	case "調略フェイズ":
+		//領国ごとの勢力を表示
+		myProvinces := ""
+		for index, province := range m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].Provinces {
+			provincePower := 0
+			//城塞の力
+			for _, castle := range province.Castles {
+				provincePower += castle.Power
+			}
+			//領国の兵士数
+			provincePower += province.Soldiers
+			//領国に居る武将の力
+			for _, general := range province.Generals {
+				provincePower += general.Power
+			}
+
+			cursor := "  "
+			if m.cursor == index {
+				cursor = "> "
+			}
+			myProvinces += cursor + fmt.Sprintf("%d", index) + ": " + province.Name + fmt.Sprintf("%d", provincePower) + fmt.Sprintf("調略賭け金: %d", province.Bids[m.gameState.PlayerCounter]) + "\n"
+		}
+		s.WriteString(myProvinces)
+		s.WriteString("\n\n")
+		//s.WriteString("調略フェイズ:\n\n")
+		s.WriteString(m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].Name)
+		s.WriteString("のターンです Please Enter\n")
+		s.WriteString(m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].SecretC[m.gameState.CardCount].Name)
+		s.WriteString("\n\n")
+		s.WriteString(m.gameState.Message)
+		s.WriteString("\n\n")
+
 	case "吉凶札実行フェイズ":
 		s.WriteString("\n\n")
 		//s.WriteString("吉凶札実行フェイズ:\n\n")
