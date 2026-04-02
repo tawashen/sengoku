@@ -48,8 +48,22 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case "調略フェイズ":
 		player := m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]] //現在のプレイヤー
-		currentProvince := player.Provinces[m.cursor]                               //カーソルのある領国
-		currentCounter := m.gameState.PlayerCounter                                 //現在のプレイヤーのカウンター
+
+		// 安全装置：カーソルが自分の領国の数を超えていたら安全な値に直す
+		if len(player.Provinces) > 0 && m.cursor >= len(player.Provinces) {
+			m.cursor = len(player.Provinces) - 1
+		} else if len(player.Provinces) == 0 {
+			// 万が一領国が0の場合はスキップ
+			m.gameState.PlayerCounter++
+			if m.gameState.PlayerCounter >= len(m.gameState.Players) {
+				m.gameState.PlayerCounter = 0
+				m.gameState.Phase = "調略結果判定フェイズ"
+			}
+			return m, nil
+		}
+
+		currentProvince := player.Provinces[m.cursor] //カーソルのある領国
+		currentCounter := m.gameState.PlayerCounter   //現在のプレイヤーのカウンター
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
