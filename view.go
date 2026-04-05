@@ -18,15 +18,32 @@ func (m model) View() string {
 
 	case "調略フェイズ":
 		//領国ごとの勢力を表示
-		myProvinces := ""
-		for index, province := range m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].Provinces {
+		myProvinces := ""                          //領国リスト
+		neighborProvinces := ""                    //隣接国リスト
+		neighborProvincesInstance := []*Province{} //隣接国リスト
+
+		for _, province := range m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].Provinces {
+			for _, neighbor := range province.Neighbors {
+				neighborProvinces += m.gameState.Provinces[neighbor].Name + ", "
+				neighborProvincesInstance = append(neighborProvincesInstance, m.gameState.Provinces[neighbor])
+			}
+		}
+
+		//領国リスト+隣接国リスト
+		combinedProvinces := append(m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].Provinces, neighborProvincesInstance...)
+
+		for index, province := range combinedProvinces {
 			provincePower := 0
-			//城塞の力
+			//自分の勢力の城塞の力
 			for _, castle := range province.Castles {
-				provincePower += castle.Power
+				if castle.Ruler == m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].Name {
+					provincePower += castle.Power
+				}
 			}
 			//領国の兵士数
-			provincePower += province.Soldiers
+			if province.OwnerID == m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].Name {
+				provincePower += province.Soldiers
+			}
 			//領国に居る武将の力
 			for _, general := range province.Generals {
 				provincePower += general.Power

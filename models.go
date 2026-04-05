@@ -82,14 +82,15 @@ type General struct {
 	Defected     bool   // 離反したか
 
 	// 大名（プレイヤー）としての拡張フィールド
-	Gold      int
-	Clan      string
-	IsAI      bool
-	Vassals   []*General  // 配下の武将
-	Provinces []*Province // 領地
-	Power     int         // 国力の合計
-	EventC    Card        // 事件札
-	SecretC   []Card      // 秘密札
+	Gold            int
+	Clan            string
+	IsAI            bool
+	Vassals         []*General  // 配下の武将
+	Provinces       []*Province // 領地
+	Power           int         // 国力の合計
+	EventC          Card        // 事件札
+	SecretC         []Card      // 秘密札
+	SchemeProvinces []*Province // 調略対象の領国　毎回初期化
 }
 
 type Scenario struct {
