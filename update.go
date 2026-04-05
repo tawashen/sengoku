@@ -41,11 +41,20 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter": //結果を表示してるだけなので次のフェイズへ
-				m.gameState.Phase = "メッセージ表示フェイズ"
-				m.gameState.Message = "調略結果を発表します"
-				m.gameState.PhaseStorage = "徴税フェイズ"
-				return m, nil
-			}
+
+				//全プレイヤーの領土をリストにする
+				//方法としては全部の国をイテレートして、調略資金が入ったか、Playerの城塞があるか、配下の武将がいるか。これらのどれかの条件に引っかかる国のみリストアップする
+				allSchemeProvinces := []*Province{}
+				for _, p := range m.gameState.Provinces {
+					if p.Bids[m.gameState.PlayerCounter] > 0 || len(p.Castles) > 0 || len(p.Generals) > 0 {
+						allSchemeProvinces = append(allSchemeProvinces, p)
+					}
+				}
+				//リストアップした国を回して、Provinceの自軍城塞の戦力の合計＋自軍兵士数＋国に居る武将（大名含む）の戦闘能力の合計＋調略に使った資金の合計を計算して、一番数値が大きい勢力がProvinceのRulerとなる。
+				for _, p := range allSchemeProvinces {
+					
+				
+
 		}
 	case "調略フェイズ":
 		player := m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]] //現在のプレイヤー
@@ -68,7 +77,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		currentProvince := player.SchemeProvinces[m.cursor] //カーソルのある領国
-		currentCounter := m.gameState.PlayerCounter   //現在のプレイヤーのカウンター
+		currentCounter := m.gameState.PlayerCounter         //現在のプレイヤーのカウンター
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
