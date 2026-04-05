@@ -90,7 +90,7 @@ type General struct {
 	Power           int         // 国力の合計
 	EventC          Card        // 事件札
 	SecretC         []Card      // 秘密札
-	SchemeProvinces []*Province // 調略対象の領国　毎回初期化
+	SchemeProvinces []*Province // 調略対象の領国　毎回初期化　新規追加
 }
 
 type Scenario struct {

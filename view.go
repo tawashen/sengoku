@@ -18,21 +18,10 @@ func (m model) View() string {
 
 	case "調略フェイズ":
 		//領国ごとの勢力を表示
-		myProvinces := ""                          //領国リスト
-		neighborProvinces := ""                    //隣接国リスト
-		neighborProvincesInstance := []*Province{} //隣接国リスト
+		myProvinces := "" //領国リスト
+		player := m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]]
 
-		for _, province := range m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].Provinces {
-			for _, neighbor := range province.Neighbors {
-				neighborProvinces += m.gameState.Provinces[neighbor].Name + ", "
-				neighborProvincesInstance = append(neighborProvincesInstance, m.gameState.Provinces[neighbor])
-			}
-		}
-
-		//領国リスト+隣接国リスト
-		combinedProvinces := append(m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]].Provinces, neighborProvincesInstance...)
-
-		for index, province := range combinedProvinces {
+		for index, province := range player.SchemeProvinces {
 			provincePower := 0
 			//自分の勢力の城塞の力
 			for _, castle := range province.Castles {

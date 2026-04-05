@@ -41,8 +41,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "enter": //結果を表示してるだけなので次のフェイズへ
-				m.gameState.Phase = "徴税フェイズ"
-				m.gameState.PlayerCounter = 0
+				m.gameState.Phase = "メッセージ表示フェイズ"
+				m.gameState.Message = "調略結果を発表します"
+				m.gameState.PhaseStorage = "徴税フェイズ"
 				return m, nil
 			}
 		}
@@ -50,19 +51,23 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		player := m.gameState.Players[m.gameState.Order[m.gameState.PlayerCounter]] //現在のプレイヤー
 
 		// 安全装置：カーソルが自分の領国の数を超えていたら安全な値に直す
-		if len(player.Provinces) > 0 && m.cursor >= len(player.Provinces) {
-			m.cursor = len(player.Provinces) - 1
-		} else if len(player.Provinces) == 0 {
-			// 万が一領国が0の場合はスキップ
+		if len(player.SchemeProvinces) > 0 && m.cursor >= len(player.SchemeProvinces) {
+			m.cursor = len(player.SchemeProvinces) - 1
+		} else if len(player.SchemeProvinces) == 0 {
+			// 万が一対象が0の場合はスキップ
 			m.gameState.PlayerCounter++
 			if m.gameState.PlayerCounter >= len(m.gameState.Players) {
 				m.gameState.PlayerCounter = 0
-				m.gameState.Phase = "調略結果判定フェイズ"
+				m.gameState.Phase = "メッセージ表示フェイズ"
+				m.gameState.Message = "調略結果を発表します"
+				m.gameState.PhaseStorage = "徴税フェイズ"
+			} else {
+				m.InitSchemeProvinces(m.gameState.PlayerCounter)
 			}
 			return m, nil
 		}
 
-		currentProvince := player.Provinces[m.cursor] //カーソルのある領国
+		currentProvince := player.SchemeProvinces[m.cursor] //カーソルのある領国
 		currentCounter := m.gameState.PlayerCounter   //現在のプレイヤーのカウンター
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
@@ -73,8 +78,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				//最後のプレイヤーだった場合には次のフェイズへ
 				if m.gameState.PlayerCounter >= len(m.gameState.Players) {
 					m.gameState.PlayerCounter = 0
-					m.gameState.Phase = "調略結果判定フェイズ"
+					m.gameState.Phase = "メッセージ表示フェイズ"
+					m.gameState.Message = "調略結果を発表します"
+					m.gameState.PhaseStorage = "徴税フェイズ"
+				} else {
+					m.InitSchemeProvinces(m.gameState.PlayerCounter)
 				}
+				m.cursor = 0
 				//カーソルの領国に資金を割り振り、数値入力
 			case "right":
 				if player.Gold == 0 {
@@ -226,6 +236,11 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.gameState.Phase = m.gameState.PhaseStorage
 				m.gameState.Message = ""
 
+				// もしこれから「調略フェイズ」に入るなら、最初のプレイヤーの対象国リストを初期化する
+				if m.gameState.Phase == "調略フェイズ" {
+					m.InitSchemeProvinces(m.gameState.PlayerCounter)
+				}
+
 				return m, nil
 			}
 			return m, nil
@@ -351,4 +366,34 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	return m, nil
 
+}
+
+// InitSchemeProvinces は、大名が調略フェイズでアクセスできる領国リスト（自分の領国＋隣接国）を生成して保存します
+func (m *model) InitSchemeProvinces(playerIdx int) {
+	if len(m.gameState.Order) == 0 {
+		return
+	}
+	player := m.gameState.Players[m.gameState.Order[playerIdx]]
+	seen := make(map[string]bool)
+	player.SchemeProvinces = []*Province{}
+
+	// 1. 自分の領国を追加
+	for _, p := range player.Provinces {
+		if !seen[p.Name] {
+			seen[p.Name] = true
+			player.SchemeProvinces = append(player.SchemeProvinces, p)
+		}
+	}
+
+	// 2. 隣接国を追加
+	for _, p := range player.Provinces {
+		for _, nID := range p.Neighbors {
+			if neighbor, ok := m.gameState.Provinces[nID]; ok {
+				if !seen[neighbor.Name] {
+					seen[neighbor.Name] = true
+					player.SchemeProvinces = append(player.SchemeProvinces, neighbor)
+				}
+			}
+		}
+	}
 }
